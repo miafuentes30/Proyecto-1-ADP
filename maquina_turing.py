@@ -1,3 +1,6 @@
+import json
+import sys
+import time
 from dataclasses import dataclass
 from typing import Dict, Tuple, List, Optional
 
@@ -5,6 +8,31 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+def banner(title, width=70):
+    #titulo
+    bar = "=" * width
+    pad = (width - len(title) - 2) // 2
+    extra = width - pad - len(title) - 1
+    print(f"\n+{bar}+")
+    print(f"|{' ' * pad} {title}{' ' * extra}|")
+    print(f"+{bar}+")
+
+def section(title):
+    # subtitulo
+    dashes = "-" * max(0, 62 - len(title))
+    print(f"\n[ {title} {dashes}]")
+
+def endsection():
+    print(f"{'-' * 67}")
+
+def info(label, value, indent=2):
+    sp = " " * indent
+    print(f"{sp}> {label}: {value}")
+
+def row_sep(width=70):
+    print("-" * width)
+    
 
 # DEFINICION DE LA MAQUINA DE TURING  - Mia 
 # ----------------------------------------------------------------------
@@ -53,6 +81,7 @@ def load_tm_from_json(path):
         transitions   = transitions,
     )
 
+
 # CINTA - Mia 
 # ----------------------------------------------------------------------
 class Tape:
@@ -94,7 +123,9 @@ class Tape:
             return ""
         lo, hi = min(self.cells), max(self.cells)
         return "".join(self.read(i) for i in range(lo, hi + 1))
-    
+
+
+
 # EJECUCION - Mia
 # ----------------------------------------------------------------------
 @dataclass
@@ -177,6 +208,7 @@ def run_tm(tm, input_str, max_steps=2_000_000, verbose=False, window=18):
     return TMResult(False, False, False, state, steps,
                     time.perf_counter() - t0, tape.trimmed(), "max_pasos_alcanzado")
 
+
 # FIBONACCI Y UNARIO - Mia
 # -----------------------------------------------------------------------
 
@@ -194,3 +226,67 @@ def fib(n):
 def unary(n):
     """Convierte un # a representacion unaria (n repeticiones de '1')."""
     return "1" * n
+
+
+# GENERADOR DE JSON - Mia
+# ------------------------------------------------------------------------
+
+def generate_fib_tm_json(max_n, out_path="fib_tm.json"):
+    """Genera y guarda la especificación JSON para Fibonacci.
+    
+    Construye una MT que:
+    - Lee un # n en representacion unaria (n veces el simbolo '1')
+    - Calcula F(n) (el n-ésimo número de Fibonacci)
+    - Escribe el resultado en representación unaria
+    
+    La maquina rechaza automáticamente entradas mayores a max_n.
+    """
+    states = ["qAccept", "qReject"]
+    transitions = {}
+
+    for i in range(max_n + 1):
+        states.append(f"q{i}")
+        if i < max_n:
+            transitions[f"q{i},1"] = [f"q{i+1}", "1", "R"]
+        else:
+            transitions[f"q{i},1"] = ["qReject", "1", "S"]
+        transitions[f"q{i},_"] = [f"qErase{i}", "_", "L"]
+
+    for i in range(max_n + 1):
+        states.append(f"qErase{i}")
+        transitions[f"qErase{i},1"] = [f"qErase{i}", "_", "L"]
+        transitions[f"qErase{i},_"] = [f"qWrite{i}_0", "_", "R"]
+
+    for i in range(max_n + 1):
+        Fi = fib(i)
+        if Fi == 0:
+            states.append(f"qWrite{i}_0")
+            transitions[f"qWrite{i}_0,_"] = ["qAccept", "_", "S"]
+        else:
+            for k in range(Fi + 1):
+                states.append(f"qWrite{i}_{k}")
+            for k in range(Fi):
+                transitions[f"qWrite{i}_{k},_"] = [f"qWrite{i}_{k+1}", "1", "R"]
+            transitions[f"qWrite{i}_{Fi},_"] = ["qAccept", "_", "S"]
+
+    tm_data = {
+        "name": f"Fibonacci MT",
+        "description": (
+            f"Maquina de Turing que calcula Fibonacci en unario para n cantidad de numeros "
+        ),
+        "blank": "_",
+        "input_alphabet": ["1"],
+        "tape_alphabet": ["1", "_"],
+        "start_state": "q0",
+        "accept_states": ["qAccept"],
+        "reject_states": ["qReject"],
+        "states": list(dict.fromkeys(states)),
+        "transitions": transitions,
+    }
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(tm_data, f, indent=2, ensure_ascii=False)
+    return out_path
+
+
+if __name__ == "__main__":
+    main()
