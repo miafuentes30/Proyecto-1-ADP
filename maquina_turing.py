@@ -52,3 +52,45 @@ def load_tm_from_json(path):
         input_alphabet= set(data.get("input_alphabet", [])),
         transitions   = transitions,
     )
+
+# CINTA - Mia 
+# ----------------------------------------------------------------------
+class Tape:
+    """Simulación de la cinta infinita de una mt
+    
+    Permite lectura, escritura y navegación en una cinta infinita.
+    Utiliza un diccionario disperso para optimizar memoria (solo almacena celdas no-blanco).
+    """
+    def __init__(self, blank):
+        self.blank = blank
+        self.cells = {}
+
+    def load(self, s):
+        self.cells = {i: ch for i, ch in enumerate(s)}
+
+    def read(self, pos):
+        return self.cells.get(pos, self.blank)
+
+    def write(self, pos, sym):
+        if sym == self.blank:
+            self.cells.pop(pos, None)
+        else:
+            self.cells[pos] = sym
+
+    def snapshot(self, head, window=20):
+        # Retorna una vista de la cinta alrededor de la posición actual del cabezal
+        lo, hi = head - window, head + window
+        parts = []
+        for i in range(lo, hi + 1):
+            s = self.read(i)
+            if i == head:
+                parts.append(f"[{s}]")
+            else:
+                parts.append(f" {s} ")
+        return "".join(parts)
+
+    def trimmed(self):
+        if not self.cells:
+            return ""
+        lo, hi = min(self.cells), max(self.cells)
+        return "".join(self.read(i) for i in range(lo, hi + 1))
