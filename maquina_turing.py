@@ -94,3 +94,86 @@ class Tape:
             return ""
         lo, hi = min(self.cells), max(self.cells)
         return "".join(self.read(i) for i in range(lo, hi + 1))
+    
+# EJECUCION - Mia
+# ----------------------------------------------------------------------
+@dataclass
+class TMResult:
+    """Resultado de la ejecucion MT
+    
+    Contiene información sobre el reultado final (aceptada/rechazada),
+    el número de pasos, tiempo de ejecución y contenido final de la cinta.
+    """
+    accepted:    bool
+    rejected:    bool
+    halted:      bool
+    final_state: str
+    steps:       int
+    time_sec:    float
+    output_tape: str
+    reason:      str
+
+
+def run_tm(tm, input_str, max_steps=2_000_000, verbose=False, window=18):
+    """
+    Simula paso a paso el funcionamiento de la mt, siguiendo sus transiciones
+    hasta llegar a un estado aceptor, rechazador o alcanzar el límite de pasos.
+    
+    Retorna un TMResult con información completa sobre la ejecucion.
+    """
+    tape = Tape(tm.blank)
+    tape.load(input_str)
+    state, head, steps = tm.start_state, 0, 0
+    t0 = time.perf_counter()
+    header_shown = False
+
+    while steps < max_steps:
+        if state in tm.accept_states:
+            return TMResult(True, False, True, state, steps,
+                            time.perf_counter() - t0, tape.trimmed(), "accept")
+        if state in tm.reject_states:
+            return TMResult(False, True, True, state, steps,
+                            time.perf_counter() - t0, tape.trimmed(), "reject")
+
+        read_sym = tape.read(head)
+        key = (state, read_sym)
+
+        if key not in tm.transitions:
+            return TMResult(False, True, True, state, steps,
+                            time.perf_counter() - t0, tape.trimmed(),
+                            f"sin_transicion({state},{read_sym})")
+
+        new_state, write_sym, move = tm.transitions[key]
+
+        if verbose:
+            show = steps < 20 or steps % 1000 == 0
+            if show:
+                if not header_shown:
+                    section("LISTADO DE CONFIGURACIONES")
+                    print(
+                        f"  {'Paso':>6}  {'Estado actual':<22}  {'Cab':>4}  "
+                        f"{'Lee':>5}  {'Escribe':>8}  {'Mueve':>6}  {'Siguiente estado'}"
+                    )
+                    row_sep()
+                    header_shown = True
+
+                print(
+                    f"  {str(steps).rjust(6)}  "
+                    f"{state:<22}  "
+                    f"{str(head).rjust(4)}  "
+                    f"{repr(read_sym).rjust(5)}  "
+                    f"{repr(write_sym).rjust(8)}  "
+                    f"{move.rjust(6)}  "
+                    f"{new_state}"
+                )
+                if steps < 8 or steps % 5000 == 0:
+                    print(f"         Cinta: {tape.snapshot(head, window)}")
+
+        tape.write(head, write_sym)
+        head += {"L": -1, "R": 1}.get(move, 0)
+        state = new_state
+        steps += 1
+
+    return TMResult(False, False, False, state, steps,
+                    time.perf_counter() - t0, tape.trimmed(), "max_pasos_alcanzado")
+
