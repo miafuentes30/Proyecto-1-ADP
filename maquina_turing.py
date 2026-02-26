@@ -177,3 +177,20 @@ def run_tm(tm, input_str, max_steps=2_000_000, verbose=False, window=18):
     return TMResult(False, False, False, state, steps,
                     time.perf_counter() - t0, tape.trimmed(), "max_pasos_alcanzado")
 
+# FIBONACCI Y UNARIO - Mia
+# -----------------------------------------------------------------------
+
+def fib(n):
+    """Calcula el n-ésimo número de Fibonacci.
+    
+    F(0)=0, F(1)=1, F(n)=F(n-1)+F(n-2) para n>=2.
+    
+    F(i+1) = F(i) + F(i-1) es la relación de recurrencia que define la secuencia de Fibonacci de este caso
+    """
+    a, b = 0, 1
+    for _ in range(n): a, b = b, a + b
+    return a
+
+def unary(n):
+    """Convierte un # a representacion unaria (n repeticiones de '1')."""
+    return "1" * n
