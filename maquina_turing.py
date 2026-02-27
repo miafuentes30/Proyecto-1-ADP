@@ -287,6 +287,62 @@ def generate_fib_tm_json(max_n, out_path="fib_tm.json"):
         json.dump(tm_data, f, indent=2, ensure_ascii=False)
     return out_path
 
+# ANALISIS EMPIRICO - Angel
+# --------------------------------------------------------------------------
+
+def r2_score(y_true, y_pred):
+    """
+    Calcula el coeficiente de determinación R² para un ajuste.
+    
+    Mide que tan bien un modelo se ajusta a los datos observados.
+    R²=1 indica ajuste perfecto, R²=0 indica que el modelo no explica la varianza.
+    """
+    ss_r = float(np.sum((y_true - y_pred) ** 2))
+    ss_t = float(np.sum((y_true - np.mean(y_true)) ** 2))
+    return 1.0 if ss_t == 0 else 1 - ss_r / ss_t
+
+def best_poly(x, y, degrees=(1, 2, 3)):
+    """
+    Encuentra el mejor ajuste polinomial entre los grados especificados.
+    
+    Prueba cada grado polinomial y retorna el que maximiza R².
+    Sirve para determinar la complejidad temporal/espacial de un algoritmo.
+    """
+    best = None
+    for deg in degrees:
+        if len(x) < deg + 1:
+            continue
+        c = np.polyfit(x, y, deg)
+        yh = np.poly1d(c)(x)
+        rv = r2_score(y, yh)
+        if best is None or rv > best["r2"]:
+            best = {"deg": deg, "coeffs": c, "y_hat": yh, "r2": rv}
+    return best
+
+
+def fmt_poly(coeffs, var="n", name="f"):
+    """
+    Convierte coeficientes polinomiales a una expresion matematica.
+
+    """
+    p = np.poly1d(coeffs)
+    terms = []
+    for i, a in enumerate(p.coeffs):
+        pw = p.order - i
+        if abs(a) < 1e-12:
+            continue
+        a_s = f"{a:.4g}"
+        if pw == 0:
+            terms.append(a_s)
+        elif pw == 1:
+            terms.append(f"{a_s}*{var}")
+        elif pw == 2:
+            terms.append(f"{a_s}*{var}^2")
+        else:
+            terms.append(f"{a_s}*{var}^{pw}")
+    expr = " + ".join(terms).replace("+ -", "- ")
+    return f"{name}({var}) = {expr}"
+
 
 if __name__ == "__main__":
     main()
