@@ -332,8 +332,172 @@ def best_poly(x, y, degrees=(1, 2, 3)):
         yh = np.poly1d(c)(x)
         rv = r2_score(y, yh)
         if best is None or rv > best["r2"]:
-            best = {"deg": deg, "coeffs": c, "y_hat": yh, "r2": rv}
+            best = {"model": "poly", "deg": deg, "coeffs": c, "y_hat": yh, "r2": rv}
     return best
+
+
+def best_exponential(x, y):
+    """
+    Ajusta un modelo exponencial y = a * b^n usando transformacion logaritmica.
+
+    Requiere y > 0 para aplicar log(y). Si no hay suficientes puntos validos,
+    retorna None.
+    """
+    mask = y > 0
+    if np.sum(mask) < 2:
+        return None
+
+    x_pos = x[mask]
+    y_pos = y[mask]
+    m, c = np.polyfit(x_pos, np.log(y_pos), 1)
+    a = float(np.exp(c))
+    b = float(np.exp(m))
+    y_hat_pos = a * np.power(b, x_pos)
+    rv = r2_score(y_pos, y_hat_pos)
+
+    return {
+        "model": "exp",
+        "a": a,
+        "b": b,
+        "slope": float(m),
+        "intercept_ln": float(c),
+        "r2": rv,
+    }
+
+
+PHI = (1 + np.sqrt(5)) / 2
+
+
+def best_hybrid(x, y, poly_degrees=(0, 1, 2, 3), phi=PHI):
+    """
+    Ajusta un modelo hibrido con base fija:
+        y = phi^n * p(n)
+
+    donde p(n) es polinomio de grado variable. Equivale a ajustar
+    p(n) sobre la señal escalada y / phi^n.
+    """
+    mask = np.isfinite(x) & np.isfinite(y)
+    if np.sum(mask) < 2:
+        return None
+
+    x_ok = x[mask]
+    y_ok = y[mask]
+    scaled = y_ok / np.power(phi, x_ok)
+    best = None
+
+    for deg in poly_degrees:
+        if len(x_ok) < deg + 1:
+            continue
+
+        coeffs = np.polyfit(x_ok, scaled, deg)
+        p_vals = np.poly1d(coeffs)(x_ok)
+        y_hat = np.power(phi, x_ok) * p_vals
+        rv = r2_score(y_ok, y_hat)
+
+        candidate = {
+            "model": "hybrid_phi",
+            "phi": float(phi),
+            "poly_deg": int(deg),
+            "coeffs": coeffs,
+            "r2": rv,
+        }
+        if best is None or rv > best["r2"]:
+            best = candidate
+
+    return best
+
+
+def best_hybrid_free_base(x, y, poly_degrees=(0, 1, 2, 3), b_min=1.01, b_max=3.5, grid_size=120):
+    """
+    Ajusta modelo hibrido con base libre:
+        y = b^n * p(n)
+
+    Recorre una malla de b y para cada base ajusta p(n) polinomial.
+    Retorna el mejor por R².
+    """
+    mask = np.isfinite(x) & np.isfinite(y)
+    if np.sum(mask) < 2:
+        return None
+
+    x_ok = x[mask]
+    y_ok = y[mask]
+
+    exp_seed = best_exponential(x_ok, np.abs(y_ok) + 1e-12)
+    if exp_seed is not None:
+        b0 = float(exp_seed["b"])
+        b_min_eff = max(1.001, min(b_min, b0 * 0.6))
+        b_max_eff = max(b_max, b0 * 1.6)
+    else:
+        b_min_eff, b_max_eff = b_min, b_max
+
+    b_grid = np.logspace(np.log10(b_min_eff), np.log10(b_max_eff), int(grid_size))
+
+    best = None
+    for b in b_grid:
+        scaled = y_ok / np.power(b, x_ok)
+        for deg in poly_degrees:
+            if len(x_ok) < deg + 1:
+                continue
+            coeffs = np.polyfit(x_ok, scaled, deg)
+            p_vals = np.poly1d(coeffs)(x_ok)
+            y_hat = np.power(b, x_ok) * p_vals
+            rv = r2_score(y_ok, y_hat)
+
+            candidate = {
+                "model": "hybrid_free",
+                "b": float(b),
+                "poly_deg": int(deg),
+                "coeffs": coeffs,
+                "r2": rv,
+            }
+            if best is None or rv > best["r2"]:
+                best = candidate
+
+    return best
+
+
+def best_model(
+    x,
+    y,
+    poly_degrees=(1, 2, 3),
+    allow_exp=True,
+    allow_hybrid_phi=True,
+    hybrid_phi_degrees=(0, 1, 2, 3),
+    allow_hybrid_free=True,
+    hybrid_free_degrees=(0, 1, 2, 3),
+):
+    """
+    Compara modelos candidatos:
+    - polinomial
+    - exponencial
+    - hibrido con base fija phi: phi^n * p(n)
+    - hibrido con base libre:   b^n * p(n)
+
+    y retorna el de mayor R².
+    """
+    candidates = []
+    poly_fit = best_poly(x, y, poly_degrees)
+    if poly_fit is not None:
+        candidates.append(poly_fit)
+
+    if allow_exp:
+        exp_fit = best_exponential(x, y)
+        if exp_fit is not None:
+            candidates.append(exp_fit)
+
+    if allow_hybrid_phi:
+        hybrid_phi_fit = best_hybrid(x, y, hybrid_phi_degrees)
+        if hybrid_phi_fit is not None:
+            candidates.append(hybrid_phi_fit)
+
+    if allow_hybrid_free:
+        hybrid_free_fit = best_hybrid_free_base(x, y, hybrid_free_degrees)
+        if hybrid_free_fit is not None:
+            candidates.append(hybrid_free_fit)
+
+    if not candidates:
+        return None
+    return max(candidates, key=lambda m: m["r2"])
 
 
 def fmt_poly(coeffs, var="n", name="f"):
@@ -360,6 +524,76 @@ def fmt_poly(coeffs, var="n", name="f"):
     return f"{name}({var}) = {expr}"
 
 
+def eval_model(model, x):
+    """Evalua un modelo (polinomial o exponencial) sobre x."""
+    if model is None:
+        return None
+    if model["model"] == "poly":
+        return np.poly1d(model["coeffs"])(x)
+    if model["model"] == "hybrid_phi":
+        return np.power(model["phi"], x) * np.poly1d(model["coeffs"])(x)
+    if model["model"] == "hybrid_free":
+        return np.power(model["b"], x) * np.poly1d(model["coeffs"])(x)
+    return model["a"] * np.power(model["b"], x)
+
+
+def fmt_model(model, var="n", name="f"):
+    """Formatea la ecuacion del modelo seleccionado."""
+    if model is None:
+        return f"{name}({var}) = N/A"
+    if model["model"] == "poly":
+        return fmt_poly(model["coeffs"], var, name)
+    if model["model"] == "hybrid_phi":
+        poly_expr = fmt_poly(model["coeffs"], var, "p").split("=", 1)[1].strip()
+        return f"{name}({var}) = ({model['phi']:.6f}^{var})*({poly_expr})"
+    if model["model"] == "hybrid_free":
+        poly_expr = fmt_poly(model["coeffs"], var, "p").split("=", 1)[1].strip()
+        return f"{name}({var}) = ({model['b']:.4g}^{var})*({poly_expr})"
+    return f"{name}({var}) = {model['a']:.4g}*({model['b']:.4g}^{var})"
+
+
+def asymptotic_from_model(model, var="n"):
+    """Infiere notacion asintotica segun el tipo de modelo ajustado."""
+    if model is None:
+        return "N/A"
+    if model["model"] == "poly":
+        deg = model["deg"]
+        return BIG_O.get(deg, f"O({var}^{deg})")
+
+    if model["model"] == "hybrid_phi":
+        deg = model["poly_deg"]
+        if deg == 0:
+            return f"O(({model['phi']:.6f})^{var})"
+        return f"O({var}^{deg}*({model['phi']:.6f})^{var})"
+
+    if model["model"] == "hybrid_free":
+        deg = model["poly_deg"]
+        b = model["b"]
+        if b <= 1 + 1e-12:
+            return BIG_O.get(deg, f"O({var}^{deg})")
+        if deg == 0:
+            return f"O(({b:.4g})^{var})"
+        return f"O({var}^{deg}*({b:.4g})^{var})"
+
+    b = model["b"]
+    if b <= 1 + 1e-12:
+        return "O(1)"
+    return f"O(({b:.4g})^{var})"
+
+
+def model_label(model):
+    """Etiqueta compacta para leyendas de graficas."""
+    if model is None:
+        return "sin ajuste"
+    if model["model"] == "poly":
+        return f"Polinomio g={model['deg']}  R2={model['r2']:.4f}"
+    if model["model"] == "hybrid_phi":
+        return f"Hibrido phi, g={model['poly_deg']}  R2={model['r2']:.4f}"
+    if model["model"] == "hybrid_free":
+        return f"Hibrido b libre, g={model['poly_deg']}, b={model['b']:.4g}  R2={model['r2']:.4f}"
+    return f"Exponencial b={model['b']:.4g}  R2={model['r2']:.4f}"
+
+
 BIG_O = {0: "O(1)", 1: "O(n)", 2: "O(n^2)", 3: "O(n^3)"}
 
 
@@ -367,7 +601,7 @@ def plot_analysis(x, steps_arr, time_arr, fit_s, fit_t, out="analisis_tm.png"):
     """
     Genera graficas del analisis empirico: pasos vs n y tiempo vs n.
     
-    Crecen los pasos de ejecución y el tiempo con respecto al tamaño de la entrada, junto con sus ajustes polinomiales.
+    Crecen los pasos de ejecución y el tiempo con respecto al tamaño de la entrada, junto con sus ajustes.
     """
     dark   = "#0d1117"
     panel  = "#161b22"
@@ -391,33 +625,106 @@ def plot_analysis(x, steps_arr, time_arr, fit_s, fit_t, out="analisis_tm.png"):
         for sp in ax.spines.values():
             sp.set_edgecolor(border)
 
+    def short_eq(model, var, name, max_len=72):
+        eq = fmt_model(model, var, name)
+        if len(eq) <= max_len:
+            return eq
+        return eq[: max_len - 3] + "..."
+
     x_fine = np.linspace(x.min(), x.max(), 300)
+
+    # Recalcular en este punto para asegurar que la grafica use
+    # siempre el modelo con mejor ajuste disponible.
+    fit_s_plot = best_model(
+        x, steps_arr,
+        (1, 2, 3),
+        allow_exp=True,
+        allow_hybrid_phi=True,
+        hybrid_phi_degrees=(0, 1, 2, 3),
+        allow_hybrid_free=True,
+        hybrid_free_degrees=(0, 1, 2, 3),
+    )
+    fit_t_plot = best_model(
+        x, time_arr,
+        (1, 2, 3),
+        allow_exp=True,
+        allow_hybrid_phi=True,
+        hybrid_phi_degrees=(0, 1, 2, 3),
+        allow_hybrid_free=True,
+        hybrid_free_degrees=(0, 1, 2, 3),
+    )
 
     axes[0, 0].scatter(x, steps_arr, color=blue, s=55, zorder=3,
                        edgecolors=border, linewidths=0.5)
-    style(axes[0, 0], "Pasos vs n  (dispersion)", "n  (longitud entrada unaria)", "Pasos")
+    if fit_s_plot:
+        axes[0, 0].plot(x_fine, eval_model(fit_s_plot, x_fine),
+                        color=red, lw=2.0, alpha=0.9, label="regresion")
+        axes[0, 0].legend(facecolor=panel, labelcolor=txt, fontsize=8, framealpha=0.7)
+    style(axes[0, 0], "Pasos vs n  (datos + regresion)", "n  (longitud entrada unaria)", "Pasos")
 
     axes[0, 1].scatter(x, steps_arr, color=blue, s=55, zorder=3,
                        edgecolors=border, linewidths=0.5, label="datos")
-    if fit_s:
-        axes[0, 1].plot(x_fine, np.poly1d(fit_s["coeffs"])(x_fine),
+    if fit_s_plot:
+        axes[0, 1].plot(x_fine, eval_model(fit_s_plot, x_fine),
                         color=red, lw=2.2,
-                        label=f"Polinomio g={fit_s['deg']}  R2={fit_s['r2']:.4f}")
-    style(axes[0, 1], "Regresion Pasos vs n", "n", "Pasos")
+                        label=model_label(fit_s_plot))
+    tipo_s_plot = {
+        "poly": "Polinomial",
+        "exp": "Exponencial",
+        "hybrid_phi": "Hibrido phi",
+        "hybrid_free": "Hibrido b libre",
+    }.get(
+        fit_s_plot["model"], fit_s_plot["model"]
+    ) if fit_s_plot else "Sin ajuste"
+    style(axes[0, 1], f"Regresion Pasos vs n ({tipo_s_plot})", "n", "Pasos")
     axes[0, 1].legend(facecolor=panel, labelcolor=txt, fontsize=8, framealpha=0.7)
+    if fit_s_plot:
+        axes[0, 1].text(
+            0.02, 0.03,
+            short_eq(fit_s_plot, "n", "pasos"),
+            transform=axes[0, 1].transAxes,
+            fontsize=7,
+            color=txt,
+            ha="left",
+            va="bottom",
+            bbox=dict(facecolor=panel, edgecolor=border, alpha=0.8, boxstyle="round,pad=0.25"),
+        )
 
     axes[1, 0].scatter(x, time_arr, color=green, s=55, zorder=3,
                        edgecolors=border, linewidths=0.5)
-    style(axes[1, 0], "Tiempo vs n  (dispersion)", "n  (longitud entrada unaria)", "Tiempo (s)")
+    if fit_t_plot:
+        axes[1, 0].plot(x_fine, eval_model(fit_t_plot, x_fine),
+                        color=red, lw=2.0, alpha=0.9, label="regresion")
+        axes[1, 0].legend(facecolor=panel, labelcolor=txt, fontsize=8, framealpha=0.7)
+    style(axes[1, 0], "Tiempo vs n  (datos + regresion)", "n  (longitud entrada unaria)", "Tiempo (s)")
 
     axes[1, 1].scatter(x, time_arr, color=green, s=55, zorder=3,
                        edgecolors=border, linewidths=0.5, label="datos")
-    if fit_t:
-        axes[1, 1].plot(x_fine, np.poly1d(fit_t["coeffs"])(x_fine),
+    if fit_t_plot:
+        axes[1, 1].plot(x_fine, eval_model(fit_t_plot, x_fine),
                         color=red, lw=2.2,
-                        label=f"Polinomio g={fit_t['deg']}  R2={fit_t['r2']:.4f}")
-    style(axes[1, 1], "Regresion Tiempo vs n", "n", "Tiempo (s)")
+                        label=model_label(fit_t_plot))
+    tipo_t_plot = {
+        "poly": "Polinomial",
+        "exp": "Exponencial",
+        "hybrid_phi": "Hibrido phi",
+        "hybrid_free": "Hibrido b libre",
+    }.get(
+        fit_t_plot["model"], fit_t_plot["model"]
+    ) if fit_t_plot else "Sin ajuste"
+    style(axes[1, 1], f"Regresion Tiempo vs n ({tipo_t_plot})", "n", "Tiempo (s)")
     axes[1, 1].legend(facecolor=panel, labelcolor=txt, fontsize=8, framealpha=0.7)
+    if fit_t_plot:
+        axes[1, 1].text(
+            0.02, 0.03,
+            short_eq(fit_t_plot, "n", "tiempo"),
+            transform=axes[1, 1].transAxes,
+            fontsize=7,
+            color=txt,
+            ha="left",
+            va="bottom",
+            bbox=dict(facecolor=panel, edgecolor=border, alpha=0.8, boxstyle="round,pad=0.25"),
+        )
 
     fig.suptitle("Analisis Empirico -- MT Fibonacci",
                  color=txt, fontsize=14, fontweight="bold", y=1.02)
@@ -449,12 +756,18 @@ def main():
         default=10,
         help="Máximo n para el análisis empírico (solo para pruebas automáticas)",
     )
+    parser.add_argument(
+        "--max-steps",
+        type=int,
+        default=2_000_000,
+        help="Límite máximo de pasos por ejecución de la MT",
+    )
     args = parser.parse_args()
 
     TM_JSON   = args.tm
     N_VALUES  = list(range(0, args.max_n + 1))
     DEMO_N    = 4
-    MAX_STEPS = 2_000_000
+    MAX_STEPS = args.max_steps
 
     # Cargar MT desde archivo JSON
     banner("MAQUINA DE TURING", C)
@@ -529,23 +842,69 @@ def main():
     y_step   = np.array([r["steps"]    for r in acc_rows], dtype=float)
     y_time   = np.array([r["time_sec"] for r in acc_rows], dtype=float)
 
-    fit_s = best_poly(x, y_step, (1, 2, 3))
-    fit_t = best_poly(x, y_time, (1, 2, 3))
+    fit_s = best_model(
+        x, y_step, (1, 2, 3),
+        allow_exp=True,
+        allow_hybrid_phi=True,
+        hybrid_phi_degrees=(0, 1, 2, 3),
+        allow_hybrid_free=True,
+        hybrid_free_degrees=(0, 1, 2, 3),
+    )
+    fit_t = best_model(
+        x, y_time, (1, 2, 3),
+        allow_exp=True,
+        allow_hybrid_phi=True,
+        hybrid_phi_degrees=(0, 1, 2, 3),
+        allow_hybrid_free=True,
+        hybrid_free_degrees=(0, 1, 2, 3),
+    )
 
-    section("MODELOS DE REGRESION POLINOMIAL")
+    section("MODELOS DE REGRESION")
     print(f"\n  {bold('Pasos de ejecucion:')}")
     if fit_s:
-        info("Grado del polinomio",    fit_s["deg"])
+        tipo_s = {
+            "poly": "Polinomial",
+            "exp": "Exponencial",
+            "hybrid_phi": "Hibrido phi",
+            "hybrid_free": "Hibrido b libre",
+        }.get(fit_s["model"], fit_s["model"])
+        info("Tipo de modelo",         tipo_s)
+        if fit_s["model"] == "poly":
+            info("Grado del polinomio", fit_s["deg"])
+        elif fit_s["model"] == "hybrid_phi":
+            info("Base fija",           f"phi = {fit_s['phi']:.6f}")
+            info("Grado de p(n)",       fit_s["poly_deg"])
+        elif fit_s["model"] == "hybrid_free":
+            info("Base exponencial",    f"b = {fit_s['b']:.6f}")
+            info("Grado de p(n)",       fit_s["poly_deg"])
+        else:
+            info("Base exponencial",    f"b = {fit_s['b']:.6f}")
         info("R^2 (bondad de ajuste)", f"{fit_s['r2']:.6f}")
-        info("Ecuacion",               clr(fmt_poly(fit_s["coeffs"], "n", "pasos"), C))
-        info("Notacion asintotica",    clr(BIG_O.get(fit_s["deg"], f"O(n^{fit_s['deg']})"), G)),
+        info("Ecuacion",               clr(fmt_model(fit_s, "n", "pasos"), C))
+        info("Notacion asintotica",    clr(asymptotic_from_model(fit_s, "n"), G))
 
     print(f"\n  {bold('Tiempo de CPU:')}")
     if fit_t:
-        info("Grado del polinomio",    fit_t["deg"])
+        tipo_t = {
+            "poly": "Polinomial",
+            "exp": "Exponencial",
+            "hybrid_phi": "Hibrido phi",
+            "hybrid_free": "Hibrido b libre",
+        }.get(fit_t["model"], fit_t["model"])
+        info("Tipo de modelo",         tipo_t)
+        if fit_t["model"] == "poly":
+            info("Grado del polinomio", fit_t["deg"])
+        elif fit_t["model"] == "hybrid_phi":
+            info("Base fija",           f"phi = {fit_t['phi']:.6f}")
+            info("Grado de p(n)",       fit_t["poly_deg"])
+        elif fit_t["model"] == "hybrid_free":
+            info("Base exponencial",    f"b = {fit_t['b']:.6f}")
+            info("Grado de p(n)",       fit_t["poly_deg"])
+        else:
+            info("Base exponencial",    f"b = {fit_t['b']:.6f}")
         info("R^2 (bondad de ajuste)", f"{fit_t['r2']:.6f}")
-        info("Ecuacion",               clr(fmt_poly(fit_t["coeffs"], "n", "tiempo"), C))
-        info("Notacion asintotica",    clr(BIG_O.get(fit_t["deg"], f"O(n^{fit_t['deg']})"), G)),
+        info("Ecuacion",               clr(fmt_model(fit_t, "n", "tiempo"), C))
+        info("Notacion asintotica",    clr(asymptotic_from_model(fit_t, "n"), G))
     endsection()
 
     # Graficas
@@ -562,9 +921,9 @@ def main():
     info("Aceptadas",         clr(str(n_acc), G))
     info("Rechazadas",        clr(str(n_rej), R) if n_rej else clr("0", G))
     if fit_s:
-        info("Complejidad pasos",  clr(BIG_O.get(fit_s["deg"], f"O(n^{fit_s['deg']})"), C))
+        info("Complejidad pasos",  clr(asymptotic_from_model(fit_s, "n"), C))
     if fit_t:
-        info("Complejidad tiempo", clr(BIG_O.get(fit_t["deg"], f"O(n^{fit_t['deg']})"), C))
+        info("Complejidad tiempo", clr(asymptotic_from_model(fit_t, "n"), C))
     print()
 
     # Modo interactivo

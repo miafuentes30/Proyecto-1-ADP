@@ -2,22 +2,31 @@
 
 ## Descripción
 
-Este proyecto implementa una Máquina de Turing que calcula la secuencia de Fibonacci para números en representación unaria. El programa incluye una simulación completa de la MT, análisis empírico de complejidad temporal y espacial, y visualizaciones del rendimiento.
+Este proyecto implementa una Máquina de Turing determinista de una cinta que calcula Fibonacci en representación unaria.
+
+El programa incluye:
+- simulación completa de la MT,
+- ejecución demostrativa con trazado de configuraciones,
+- análisis empírico de pasos y tiempo de CPU,
+- selección automática de modelos de regresión,
+- generación de gráficas del ajuste.
 
 ## Características
 
-- **Simulación de Máquina de Turing**: Implementación completa con cinta infinita, estados, transiciones y alfabetos
-- **Cálculo de Fibonacci**: Convierte entrada unaria (n×'1') al n-ésimo número de Fibonacci
-- **Análisis Empírico**: Regresión polinomial para determinar complejidad temporal O(n)
-- **Visualización**: Gráficas de dispersión y ajuste para pasos de ejecución y tiempo de CPU
-- **Iterfaz de usuario**: Interfaz de usuario para probar diferentes valores de n
-- **Trazado**: Visualización paso a paso de las configuraciones de la MT
+- **Simulación de MT**: cinta infinita, estados, transiciones y alfabetos definidos desde JSON.
+- **Cálculo de Fibonacci**: entrada unaria (n símbolos `1`) y salida unaria de `F(n)`.
+- **Análisis empírico**: evaluación de crecimiento en pasos y tiempo para un rango de `n`.
+- **Modelado de regresión**: comparación de modelos polinomial, exponencial e híbridos.
+- **Visualización**: gráficas de dispersión y curvas de regresión en `analisis_tm.png`.
+- **Interfaz de usuario**: modo interactivo para probar valores de `n`.
 
 ## Requisitos
 
-- Python 3.7+
+- Python 3.8+
 - NumPy
 - Matplotlib
+
+Instalación rápida:
 
 ```bash
 pip install numpy matplotlib
@@ -25,50 +34,43 @@ pip install numpy matplotlib
 
 ## Ejecución
 
-Ejecuta el programa principal:
+Ejecución básica:
 
 ```bash
 python maquina_turing.py
 ```
 
-También puedes indicar explícitamente el JSON de la MT y el rango del análisis empírico:
+Con parámetros:
 
 ```bash
-python maquina_turing.py --tm fib_tm_real.json --max-n 10
+python maquina_turing.py --tm fib_tm_real.json --max-n 18 --max-steps 50000000
 ```
 
-El programa realizará:
-1. Carga de la MT desde el archivo JSON indicado (por defecto `fib_tm_real.json`)
-2. Simulación para n=4
-3. Análisis empírico con valores de n desde 0 hasta el valor de `--max-n`
-4. Generación de gráficas 
-5. Interfaz para probar valores personalizados
+El programa realiza:
+1. Carga de la MT desde `fib_tm_real.json` (o la ruta indicada).
+2. Simulación demostrativa para `n=4`.
+3. Análisis empírico para `n=0..max-n`.
+4. Ajuste y selección del modelo de regresión.
+5. Generación de la gráfica `analisis_tm.png`.
+6. Modo interactivo para consultas manuales.
 
-> Nota: `fib_tm.json` se mantiene como versión tabulada/acotada (precomputada). Para una MT que calcula por recurrencia en cinta, usa `fib_tm_real.json`.
+## Funcionamiento general de la MT
 
+La MT real implementa la recurrencia de Fibonacci en cinta:
 
-## Funcionamiento de la MT
+1. Convierte y marca la entrada unaria en la zona de trabajo.
+2. Inicializa los acumuladores de la recurrencia.
+3. Itera consumiendo marcas y actualizando acumuladores.
+4. Limpia símbolos auxiliares.
+5. Deja en cinta la salida unaria de `F(n)` y acepta.
 
-1. **Lectura**: Cuenta n símbolos '1' en la entrada
-2. **Borrado**: Limpia la cinta de entrada
-3. **Escritura**: Escribe F(n) símbolos '1' como resultado
-4. **Aceptación**: Transiciona al estado qAccept
+## Archivos principales
 
-## Documentación para entrega
-
-### MT real (recurrencia en cinta)
-
-- Convenciones: [convenciones_mt_real.md](convenciones_mt_real.md)
+- Script principal: [maquina_turing.py](maquina_turing.py)
+- Definición de la MT real: [fib_tm_real.json](fib_tm_real.json)
+- Convenciones de la MT: [convenciones_mt_real.md](convenciones_mt_real.md)
 - Diagrama simplificado: [diagrama_mt_real_simplificado.md](diagrama_mt_real_simplificado.md)
-- Componentes MT: [fib_tm_real.json](fib_tm_real.json)
-
-### Versiones anteriores (conservadas)
-
-- Componentes tabulados: [fib_tm.json](fib_tm.json)
-- Diagrama detallado tabulado: [diagrama_transiciones.md](diagrama_transiciones.md)
-- Diagrama simplificado tabulado: [diagrama_transiciones_simplificado.md](diagrama_transiciones_simplificado.md)
-- Diagrama básico explicativo: [diagrama_fases_basico.md](diagrama_fases_basico.md)
-
-### Verificación de cumplimiento
-
-- Checklist contra instrucciones: [checklist_cumplimiento.md](checklist_cumplimiento.md)
+- Diagrama completo: [diagrama_mt_real_completo.md](diagrama_mt_real_completo.md)
+- Diagrama completo agrupado: [diagrama_mt_real_completo_agrupado.md](diagrama_mt_real_completo_agrupado.md)
+- Gráfica de análisis empírico: [analisis_tm.png](analisis_tm.png)
+- Informe: [Informe.pdf](Informe.pdf)
