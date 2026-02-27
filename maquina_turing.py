@@ -449,12 +449,18 @@ def main():
         default=10,
         help="Máximo n para el análisis empírico (solo para pruebas automáticas)",
     )
+    parser.add_argument(
+        "--max-steps",
+        type=int,
+        default=2_000_000,
+        help="Límite máximo de pasos por ejecución de la MT",
+    )
     args = parser.parse_args()
 
     TM_JSON   = args.tm
     N_VALUES  = list(range(0, args.max_n + 1))
     DEMO_N    = 4
-    MAX_STEPS = 2_000_000
+    MAX_STEPS = args.max_steps
 
     # Cargar MT desde archivo JSON
     banner("MAQUINA DE TURING", C)

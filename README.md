@@ -34,13 +34,14 @@ python maquina_turing.py
 También puedes indicar explícitamente el JSON de la MT y el rango del análisis empírico:
 
 ```bash
-python maquina_turing.py --tm fib_tm_real.json --max-n 10
+python maquina_turing.py --tm fib_tm_real.json --max-n 10 --max-steps 2000000
 ```
 
 El programa realizará:
 1. Carga de la MT desde el archivo JSON indicado (por defecto `fib_tm_real.json`)
 2. Simulación para n=4
 3. Análisis empírico con valores de n desde 0 hasta el valor de `--max-n`
+	(cada ejecución respeta el límite `--max-steps`)
 4. Generación de gráficas 
 5. Interfaz para probar valores personalizados
 
