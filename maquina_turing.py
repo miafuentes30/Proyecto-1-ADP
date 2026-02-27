@@ -680,13 +680,13 @@ def plot_analysis(x, steps_arr, time_arr, fit_s, fit_t, out="analisis_tm.png"):
     axes[0, 1].legend(facecolor=panel, labelcolor=txt, fontsize=8, framealpha=0.7)
     if fit_s_plot:
         axes[0, 1].text(
-            0.02, 0.03,
+            0.02, 0.97,
             short_eq(fit_s_plot, "n", "pasos"),
             transform=axes[0, 1].transAxes,
             fontsize=7,
             color=txt,
             ha="left",
-            va="bottom",
+            va="top",
             bbox=dict(facecolor=panel, edgecolor=border, alpha=0.8, boxstyle="round,pad=0.25"),
         )
 
@@ -716,13 +716,13 @@ def plot_analysis(x, steps_arr, time_arr, fit_s, fit_t, out="analisis_tm.png"):
     axes[1, 1].legend(facecolor=panel, labelcolor=txt, fontsize=8, framealpha=0.7)
     if fit_t_plot:
         axes[1, 1].text(
-            0.02, 0.03,
+            0.02, 0.97,
             short_eq(fit_t_plot, "n", "tiempo"),
             transform=axes[1, 1].transAxes,
             fontsize=7,
             color=txt,
             ha="left",
-            va="bottom",
+            va="top",
             bbox=dict(facecolor=panel, edgecolor=border, alpha=0.8, boxstyle="round,pad=0.25"),
         )
 
