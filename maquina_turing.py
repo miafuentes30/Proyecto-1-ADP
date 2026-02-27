@@ -343,6 +343,71 @@ def fmt_poly(coeffs, var="n", name="f"):
     expr = " + ".join(terms).replace("+ -", "- ")
     return f"{name}({var}) = {expr}"
 
+BIG_O = {0: "O(1)", 1: "O(n)", 2: "O(n^2)", 3: "O(n^3)"}
+
+
+def plot_analysis(x, steps_arr, time_arr, fit_s, fit_t, out="analisis_tm.png"):
+    """
+    Genera graficas del analisis empirico: pasos vs n y tiempo vs n.
+    
+    Crecen los pasos de ejecución y el tiempo con respecto al tamaño de la entrada, junto con sus ajustes polinomiales.
+    """
+    dark   = "#0d1117"
+    panel  = "#161b22"
+    border = "#30363d"
+    txt    = "#e6edf3"
+    blue   = "#58a6ff"
+    green  = "#3fb950"
+    red    = "#f78166"
+    grid_c = "#21262d"
+
+    fig, axes = plt.subplots(2, 2, figsize=(13, 9))
+    fig.patch.set_facecolor(dark)
+
+    def style(ax, title, xl, yl):
+        ax.set_facecolor(panel)
+        ax.set_title(title, color=txt, fontsize=11, pad=8)
+        ax.set_xlabel(xl, color=txt, fontsize=9)
+        ax.set_ylabel(yl, color=txt, fontsize=9)
+        ax.tick_params(colors=txt, labelsize=8)
+        ax.grid(True, color=grid_c, linewidth=0.5)
+        for sp in ax.spines.values():
+            sp.set_edgecolor(border)
+
+    x_fine = np.linspace(x.min(), x.max(), 300)
+
+    axes[0, 0].scatter(x, steps_arr, color=blue, s=55, zorder=3,
+                       edgecolors=border, linewidths=0.5)
+    style(axes[0, 0], "Pasos vs n  (dispersion)", "n  (longitud entrada unaria)", "Pasos")
+
+    axes[0, 1].scatter(x, steps_arr, color=blue, s=55, zorder=3,
+                       edgecolors=border, linewidths=0.5, label="datos")
+    if fit_s:
+        axes[0, 1].plot(x_fine, np.poly1d(fit_s["coeffs"])(x_fine),
+                        color=red, lw=2.2,
+                        label=f"Polinomio g={fit_s['deg']}  R2={fit_s['r2']:.4f}")
+    style(axes[0, 1], "Regresion Pasos vs n", "n", "Pasos")
+    axes[0, 1].legend(facecolor=panel, labelcolor=txt, fontsize=8, framealpha=0.7)
+
+    axes[1, 0].scatter(x, time_arr, color=green, s=55, zorder=3,
+                       edgecolors=border, linewidths=0.5)
+    style(axes[1, 0], "Tiempo vs n  (dispersion)", "n  (longitud entrada unaria)", "Tiempo (s)")
+
+    axes[1, 1].scatter(x, time_arr, color=green, s=55, zorder=3,
+                       edgecolors=border, linewidths=0.5, label="datos")
+    if fit_t:
+        axes[1, 1].plot(x_fine, np.poly1d(fit_t["coeffs"])(x_fine),
+                        color=red, lw=2.2,
+                        label=f"Polinomio g={fit_t['deg']}  R2={fit_t['r2']:.4f}")
+    style(axes[1, 1], "Regresion Tiempo vs n", "n", "Tiempo (s)")
+    axes[1, 1].legend(facecolor=panel, labelcolor=txt, fontsize=8, framealpha=0.7)
+
+    fig.suptitle("Analisis Empirico -- MT Fibonacci",
+                 color=txt, fontsize=14, fontweight="bold", y=1.02)
+    plt.tight_layout()
+    plt.savefig(out, dpi=160, bbox_inches="tight", facecolor=dark)
+    plt.close()
+    return out
 
 if __name__ == "__main__":
     main()
