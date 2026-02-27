@@ -1,0 +1,1191 @@
+{
+  "name": "Fibonacci MT",
+  "description": "Maquina de Turing que calcula Fibonacci en unario para n cantidad de numeros ",
+  "blank": "_",
+  "input_alphabet": [
+    "1"
+  ],
+  "tape_alphabet": [
+    "1",
+    "_"
+  ],
+  "start_state": "q0",
+  "accept_states": [
+    "qAccept"
+  ],
+  "reject_states": [
+    "qReject"
+  ],
+  "states": [
+    "qAccept",
+    "qReject",
+    "q0",
+    "q1",
+    "q2",
+    "q3",
+    "q4",
+    "q5",
+    "q6",
+    "q7",
+    "q8",
+    "q9",
+    "q10",
+    "qErase0",
+    "qErase1",
+    "qErase2",
+    "qErase3",
+    "qErase4",
+    "qErase5",
+    "qErase6",
+    "qErase7",
+    "qErase8",
+    "qErase9",
+    "qErase10",
+    "qWrite0_0",
+    "qWrite1_0",
+    "qWrite1_1",
+    "qWrite2_0",
+    "qWrite2_1",
+    "qWrite3_0",
+    "qWrite3_1",
+    "qWrite3_2",
+    "qWrite4_0",
+    "qWrite4_1",
+    "qWrite4_2",
+    "qWrite4_3",
+    "qWrite5_0",
+    "qWrite5_1",
+    "qWrite5_2",
+    "qWrite5_3",
+    "qWrite5_4",
+    "qWrite5_5",
+    "qWrite6_0",
+    "qWrite6_1",
+    "qWrite6_2",
+    "qWrite6_3",
+    "qWrite6_4",
+    "qWrite6_5",
+    "qWrite6_6",
+    "qWrite6_7",
+    "qWrite6_8",
+    "qWrite7_0",
+    "qWrite7_1",
+    "qWrite7_2",
+    "qWrite7_3",
+    "qWrite7_4",
+    "qWrite7_5",
+    "qWrite7_6",
+    "qWrite7_7",
+    "qWrite7_8",
+    "qWrite7_9",
+    "qWrite7_10",
+    "qWrite7_11",
+    "qWrite7_12",
+    "qWrite7_13",
+    "qWrite8_0",
+    "qWrite8_1",
+    "qWrite8_2",
+    "qWrite8_3",
+    "qWrite8_4",
+    "qWrite8_5",
+    "qWrite8_6",
+    "qWrite8_7",
+    "qWrite8_8",
+    "qWrite8_9",
+    "qWrite8_10",
+    "qWrite8_11",
+    "qWrite8_12",
+    "qWrite8_13",
+    "qWrite8_14",
+    "qWrite8_15",
+    "qWrite8_16",
+    "qWrite8_17",
+    "qWrite8_18",
+    "qWrite8_19",
+    "qWrite8_20",
+    "qWrite8_21",
+    "qWrite9_0",
+    "qWrite9_1",
+    "qWrite9_2",
+    "qWrite9_3",
+    "qWrite9_4",
+    "qWrite9_5",
+    "qWrite9_6",
+    "qWrite9_7",
+    "qWrite9_8",
+    "qWrite9_9",
+    "qWrite9_10",
+    "qWrite9_11",
+    "qWrite9_12",
+    "qWrite9_13",
+    "qWrite9_14",
+    "qWrite9_15",
+    "qWrite9_16",
+    "qWrite9_17",
+    "qWrite9_18",
+    "qWrite9_19",
+    "qWrite9_20",
+    "qWrite9_21",
+    "qWrite9_22",
+    "qWrite9_23",
+    "qWrite9_24",
+    "qWrite9_25",
+    "qWrite9_26",
+    "qWrite9_27",
+    "qWrite9_28",
+    "qWrite9_29",
+    "qWrite9_30",
+    "qWrite9_31",
+    "qWrite9_32",
+    "qWrite9_33",
+    "qWrite9_34",
+    "qWrite10_0",
+    "qWrite10_1",
+    "qWrite10_2",
+    "qWrite10_3",
+    "qWrite10_4",
+    "qWrite10_5",
+    "qWrite10_6",
+    "qWrite10_7",
+    "qWrite10_8",
+    "qWrite10_9",
+    "qWrite10_10",
+    "qWrite10_11",
+    "qWrite10_12",
+    "qWrite10_13",
+    "qWrite10_14",
+    "qWrite10_15",
+    "qWrite10_16",
+    "qWrite10_17",
+    "qWrite10_18",
+    "qWrite10_19",
+    "qWrite10_20",
+    "qWrite10_21",
+    "qWrite10_22",
+    "qWrite10_23",
+    "qWrite10_24",
+    "qWrite10_25",
+    "qWrite10_26",
+    "qWrite10_27",
+    "qWrite10_28",
+    "qWrite10_29",
+    "qWrite10_30",
+    "qWrite10_31",
+    "qWrite10_32",
+    "qWrite10_33",
+    "qWrite10_34",
+    "qWrite10_35",
+    "qWrite10_36",
+    "qWrite10_37",
+    "qWrite10_38",
+    "qWrite10_39",
+    "qWrite10_40",
+    "qWrite10_41",
+    "qWrite10_42",
+    "qWrite10_43",
+    "qWrite10_44",
+    "qWrite10_45",
+    "qWrite10_46",
+    "qWrite10_47",
+    "qWrite10_48",
+    "qWrite10_49",
+    "qWrite10_50",
+    "qWrite10_51",
+    "qWrite10_52",
+    "qWrite10_53",
+    "qWrite10_54",
+    "qWrite10_55"
+  ],
+  "transitions": {
+    "q0,1": [
+      "q1",
+      "1",
+      "R"
+    ],
+    "q0,_": [
+      "qErase0",
+      "_",
+      "L"
+    ],
+    "q1,1": [
+      "q2",
+      "1",
+      "R"
+    ],
+    "q1,_": [
+      "qErase1",
+      "_",
+      "L"
+    ],
+    "q2,1": [
+      "q3",
+      "1",
+      "R"
+    ],
+    "q2,_": [
+      "qErase2",
+      "_",
+      "L"
+    ],
+    "q3,1": [
+      "q4",
+      "1",
+      "R"
+    ],
+    "q3,_": [
+      "qErase3",
+      "_",
+      "L"
+    ],
+    "q4,1": [
+      "q5",
+      "1",
+      "R"
+    ],
+    "q4,_": [
+      "qErase4",
+      "_",
+      "L"
+    ],
+    "q5,1": [
+      "q6",
+      "1",
+      "R"
+    ],
+    "q5,_": [
+      "qErase5",
+      "_",
+      "L"
+    ],
+    "q6,1": [
+      "q7",
+      "1",
+      "R"
+    ],
+    "q6,_": [
+      "qErase6",
+      "_",
+      "L"
+    ],
+    "q7,1": [
+      "q8",
+      "1",
+      "R"
+    ],
+    "q7,_": [
+      "qErase7",
+      "_",
+      "L"
+    ],
+    "q8,1": [
+      "q9",
+      "1",
+      "R"
+    ],
+    "q8,_": [
+      "qErase8",
+      "_",
+      "L"
+    ],
+    "q9,1": [
+      "q10",
+      "1",
+      "R"
+    ],
+    "q9,_": [
+      "qErase9",
+      "_",
+      "L"
+    ],
+    "q10,1": [
+      "qReject",
+      "1",
+      "S"
+    ],
+    "q10,_": [
+      "qErase10",
+      "_",
+      "L"
+    ],
+    "qErase0,1": [
+      "qErase0",
+      "_",
+      "L"
+    ],
+    "qErase0,_": [
+      "qWrite0_0",
+      "_",
+      "R"
+    ],
+    "qErase1,1": [
+      "qErase1",
+      "_",
+      "L"
+    ],
+    "qErase1,_": [
+      "qWrite1_0",
+      "_",
+      "R"
+    ],
+    "qErase2,1": [
+      "qErase2",
+      "_",
+      "L"
+    ],
+    "qErase2,_": [
+      "qWrite2_0",
+      "_",
+      "R"
+    ],
+    "qErase3,1": [
+      "qErase3",
+      "_",
+      "L"
+    ],
+    "qErase3,_": [
+      "qWrite3_0",
+      "_",
+      "R"
+    ],
+    "qErase4,1": [
+      "qErase4",
+      "_",
+      "L"
+    ],
+    "qErase4,_": [
+      "qWrite4_0",
+      "_",
+      "R"
+    ],
+    "qErase5,1": [
+      "qErase5",
+      "_",
+      "L"
+    ],
+    "qErase5,_": [
+      "qWrite5_0",
+      "_",
+      "R"
+    ],
+    "qErase6,1": [
+      "qErase6",
+      "_",
+      "L"
+    ],
+    "qErase6,_": [
+      "qWrite6_0",
+      "_",
+      "R"
+    ],
+    "qErase7,1": [
+      "qErase7",
+      "_",
+      "L"
+    ],
+    "qErase7,_": [
+      "qWrite7_0",
+      "_",
+      "R"
+    ],
+    "qErase8,1": [
+      "qErase8",
+      "_",
+      "L"
+    ],
+    "qErase8,_": [
+      "qWrite8_0",
+      "_",
+      "R"
+    ],
+    "qErase9,1": [
+      "qErase9",
+      "_",
+      "L"
+    ],
+    "qErase9,_": [
+      "qWrite9_0",
+      "_",
+      "R"
+    ],
+    "qErase10,1": [
+      "qErase10",
+      "_",
+      "L"
+    ],
+    "qErase10,_": [
+      "qWrite10_0",
+      "_",
+      "R"
+    ],
+    "qWrite0_0,_": [
+      "qAccept",
+      "_",
+      "S"
+    ],
+    "qWrite1_0,_": [
+      "qWrite1_1",
+      "1",
+      "R"
+    ],
+    "qWrite1_1,_": [
+      "qAccept",
+      "_",
+      "S"
+    ],
+    "qWrite2_0,_": [
+      "qWrite2_1",
+      "1",
+      "R"
+    ],
+    "qWrite2_1,_": [
+      "qAccept",
+      "_",
+      "S"
+    ],
+    "qWrite3_0,_": [
+      "qWrite3_1",
+      "1",
+      "R"
+    ],
+    "qWrite3_1,_": [
+      "qWrite3_2",
+      "1",
+      "R"
+    ],
+    "qWrite3_2,_": [
+      "qAccept",
+      "_",
+      "S"
+    ],
+    "qWrite4_0,_": [
+      "qWrite4_1",
+      "1",
+      "R"
+    ],
+    "qWrite4_1,_": [
+      "qWrite4_2",
+      "1",
+      "R"
+    ],
+    "qWrite4_2,_": [
+      "qWrite4_3",
+      "1",
+      "R"
+    ],
+    "qWrite4_3,_": [
+      "qAccept",
+      "_",
+      "S"
+    ],
+    "qWrite5_0,_": [
+      "qWrite5_1",
+      "1",
+      "R"
+    ],
+    "qWrite5_1,_": [
+      "qWrite5_2",
+      "1",
+      "R"
+    ],
+    "qWrite5_2,_": [
+      "qWrite5_3",
+      "1",
+      "R"
+    ],
+    "qWrite5_3,_": [
+      "qWrite5_4",
+      "1",
+      "R"
+    ],
+    "qWrite5_4,_": [
+      "qWrite5_5",
+      "1",
+      "R"
+    ],
+    "qWrite5_5,_": [
+      "qAccept",
+      "_",
+      "S"
+    ],
+    "qWrite6_0,_": [
+      "qWrite6_1",
+      "1",
+      "R"
+    ],
+    "qWrite6_1,_": [
+      "qWrite6_2",
+      "1",
+      "R"
+    ],
+    "qWrite6_2,_": [
+      "qWrite6_3",
+      "1",
+      "R"
+    ],
+    "qWrite6_3,_": [
+      "qWrite6_4",
+      "1",
+      "R"
+    ],
+    "qWrite6_4,_": [
+      "qWrite6_5",
+      "1",
+      "R"
+    ],
+    "qWrite6_5,_": [
+      "qWrite6_6",
+      "1",
+      "R"
+    ],
+    "qWrite6_6,_": [
+      "qWrite6_7",
+      "1",
+      "R"
+    ],
+    "qWrite6_7,_": [
+      "qWrite6_8",
+      "1",
+      "R"
+    ],
+    "qWrite6_8,_": [
+      "qAccept",
+      "_",
+      "S"
+    ],
+    "qWrite7_0,_": [
+      "qWrite7_1",
+      "1",
+      "R"
+    ],
+    "qWrite7_1,_": [
+      "qWrite7_2",
+      "1",
+      "R"
+    ],
+    "qWrite7_2,_": [
+      "qWrite7_3",
+      "1",
+      "R"
+    ],
+    "qWrite7_3,_": [
+      "qWrite7_4",
+      "1",
+      "R"
+    ],
+    "qWrite7_4,_": [
+      "qWrite7_5",
+      "1",
+      "R"
+    ],
+    "qWrite7_5,_": [
+      "qWrite7_6",
+      "1",
+      "R"
+    ],
+    "qWrite7_6,_": [
+      "qWrite7_7",
+      "1",
+      "R"
+    ],
+    "qWrite7_7,_": [
+      "qWrite7_8",
+      "1",
+      "R"
+    ],
+    "qWrite7_8,_": [
+      "qWrite7_9",
+      "1",
+      "R"
+    ],
+    "qWrite7_9,_": [
+      "qWrite7_10",
+      "1",
+      "R"
+    ],
+    "qWrite7_10,_": [
+      "qWrite7_11",
+      "1",
+      "R"
+    ],
+    "qWrite7_11,_": [
+      "qWrite7_12",
+      "1",
+      "R"
+    ],
+    "qWrite7_12,_": [
+      "qWrite7_13",
+      "1",
+      "R"
+    ],
+    "qWrite7_13,_": [
+      "qAccept",
+      "_",
+      "S"
+    ],
+    "qWrite8_0,_": [
+      "qWrite8_1",
+      "1",
+      "R"
+    ],
+    "qWrite8_1,_": [
+      "qWrite8_2",
+      "1",
+      "R"
+    ],
+    "qWrite8_2,_": [
+      "qWrite8_3",
+      "1",
+      "R"
+    ],
+    "qWrite8_3,_": [
+      "qWrite8_4",
+      "1",
+      "R"
+    ],
+    "qWrite8_4,_": [
+      "qWrite8_5",
+      "1",
+      "R"
+    ],
+    "qWrite8_5,_": [
+      "qWrite8_6",
+      "1",
+      "R"
+    ],
+    "qWrite8_6,_": [
+      "qWrite8_7",
+      "1",
+      "R"
+    ],
+    "qWrite8_7,_": [
+      "qWrite8_8",
+      "1",
+      "R"
+    ],
+    "qWrite8_8,_": [
+      "qWrite8_9",
+      "1",
+      "R"
+    ],
+    "qWrite8_9,_": [
+      "qWrite8_10",
+      "1",
+      "R"
+    ],
+    "qWrite8_10,_": [
+      "qWrite8_11",
+      "1",
+      "R"
+    ],
+    "qWrite8_11,_": [
+      "qWrite8_12",
+      "1",
+      "R"
+    ],
+    "qWrite8_12,_": [
+      "qWrite8_13",
+      "1",
+      "R"
+    ],
+    "qWrite8_13,_": [
+      "qWrite8_14",
+      "1",
+      "R"
+    ],
+    "qWrite8_14,_": [
+      "qWrite8_15",
+      "1",
+      "R"
+    ],
+    "qWrite8_15,_": [
+      "qWrite8_16",
+      "1",
+      "R"
+    ],
+    "qWrite8_16,_": [
+      "qWrite8_17",
+      "1",
+      "R"
+    ],
+    "qWrite8_17,_": [
+      "qWrite8_18",
+      "1",
+      "R"
+    ],
+    "qWrite8_18,_": [
+      "qWrite8_19",
+      "1",
+      "R"
+    ],
+    "qWrite8_19,_": [
+      "qWrite8_20",
+      "1",
+      "R"
+    ],
+    "qWrite8_20,_": [
+      "qWrite8_21",
+      "1",
+      "R"
+    ],
+    "qWrite8_21,_": [
+      "qAccept",
+      "_",
+      "S"
+    ],
+    "qWrite9_0,_": [
+      "qWrite9_1",
+      "1",
+      "R"
+    ],
+    "qWrite9_1,_": [
+      "qWrite9_2",
+      "1",
+      "R"
+    ],
+    "qWrite9_2,_": [
+      "qWrite9_3",
+      "1",
+      "R"
+    ],
+    "qWrite9_3,_": [
+      "qWrite9_4",
+      "1",
+      "R"
+    ],
+    "qWrite9_4,_": [
+      "qWrite9_5",
+      "1",
+      "R"
+    ],
+    "qWrite9_5,_": [
+      "qWrite9_6",
+      "1",
+      "R"
+    ],
+    "qWrite9_6,_": [
+      "qWrite9_7",
+      "1",
+      "R"
+    ],
+    "qWrite9_7,_": [
+      "qWrite9_8",
+      "1",
+      "R"
+    ],
+    "qWrite9_8,_": [
+      "qWrite9_9",
+      "1",
+      "R"
+    ],
+    "qWrite9_9,_": [
+      "qWrite9_10",
+      "1",
+      "R"
+    ],
+    "qWrite9_10,_": [
+      "qWrite9_11",
+      "1",
+      "R"
+    ],
+    "qWrite9_11,_": [
+      "qWrite9_12",
+      "1",
+      "R"
+    ],
+    "qWrite9_12,_": [
+      "qWrite9_13",
+      "1",
+      "R"
+    ],
+    "qWrite9_13,_": [
+      "qWrite9_14",
+      "1",
+      "R"
+    ],
+    "qWrite9_14,_": [
+      "qWrite9_15",
+      "1",
+      "R"
+    ],
+    "qWrite9_15,_": [
+      "qWrite9_16",
+      "1",
+      "R"
+    ],
+    "qWrite9_16,_": [
+      "qWrite9_17",
+      "1",
+      "R"
+    ],
+    "qWrite9_17,_": [
+      "qWrite9_18",
+      "1",
+      "R"
+    ],
+    "qWrite9_18,_": [
+      "qWrite9_19",
+      "1",
+      "R"
+    ],
+    "qWrite9_19,_": [
+      "qWrite9_20",
+      "1",
+      "R"
+    ],
+    "qWrite9_20,_": [
+      "qWrite9_21",
+      "1",
+      "R"
+    ],
+    "qWrite9_21,_": [
+      "qWrite9_22",
+      "1",
+      "R"
+    ],
+    "qWrite9_22,_": [
+      "qWrite9_23",
+      "1",
+      "R"
+    ],
+    "qWrite9_23,_": [
+      "qWrite9_24",
+      "1",
+      "R"
+    ],
+    "qWrite9_24,_": [
+      "qWrite9_25",
+      "1",
+      "R"
+    ],
+    "qWrite9_25,_": [
+      "qWrite9_26",
+      "1",
+      "R"
+    ],
+    "qWrite9_26,_": [
+      "qWrite9_27",
+      "1",
+      "R"
+    ],
+    "qWrite9_27,_": [
+      "qWrite9_28",
+      "1",
+      "R"
+    ],
+    "qWrite9_28,_": [
+      "qWrite9_29",
+      "1",
+      "R"
+    ],
+    "qWrite9_29,_": [
+      "qWrite9_30",
+      "1",
+      "R"
+    ],
+    "qWrite9_30,_": [
+      "qWrite9_31",
+      "1",
+      "R"
+    ],
+    "qWrite9_31,_": [
+      "qWrite9_32",
+      "1",
+      "R"
+    ],
+    "qWrite9_32,_": [
+      "qWrite9_33",
+      "1",
+      "R"
+    ],
+    "qWrite9_33,_": [
+      "qWrite9_34",
+      "1",
+      "R"
+    ],
+    "qWrite9_34,_": [
+      "qAccept",
+      "_",
+      "S"
+    ],
+    "qWrite10_0,_": [
+      "qWrite10_1",
+      "1",
+      "R"
+    ],
+    "qWrite10_1,_": [
+      "qWrite10_2",
+      "1",
+      "R"
+    ],
+    "qWrite10_2,_": [
+      "qWrite10_3",
+      "1",
+      "R"
+    ],
+    "qWrite10_3,_": [
+      "qWrite10_4",
+      "1",
+      "R"
+    ],
+    "qWrite10_4,_": [
+      "qWrite10_5",
+      "1",
+      "R"
+    ],
+    "qWrite10_5,_": [
+      "qWrite10_6",
+      "1",
+      "R"
+    ],
+    "qWrite10_6,_": [
+      "qWrite10_7",
+      "1",
+      "R"
+    ],
+    "qWrite10_7,_": [
+      "qWrite10_8",
+      "1",
+      "R"
+    ],
+    "qWrite10_8,_": [
+      "qWrite10_9",
+      "1",
+      "R"
+    ],
+    "qWrite10_9,_": [
+      "qWrite10_10",
+      "1",
+      "R"
+    ],
+    "qWrite10_10,_": [
+      "qWrite10_11",
+      "1",
+      "R"
+    ],
+    "qWrite10_11,_": [
+      "qWrite10_12",
+      "1",
+      "R"
+    ],
+    "qWrite10_12,_": [
+      "qWrite10_13",
+      "1",
+      "R"
+    ],
+    "qWrite10_13,_": [
+      "qWrite10_14",
+      "1",
+      "R"
+    ],
+    "qWrite10_14,_": [
+      "qWrite10_15",
+      "1",
+      "R"
+    ],
+    "qWrite10_15,_": [
+      "qWrite10_16",
+      "1",
+      "R"
+    ],
+    "qWrite10_16,_": [
+      "qWrite10_17",
+      "1",
+      "R"
+    ],
+    "qWrite10_17,_": [
+      "qWrite10_18",
+      "1",
+      "R"
+    ],
+    "qWrite10_18,_": [
+      "qWrite10_19",
+      "1",
+      "R"
+    ],
+    "qWrite10_19,_": [
+      "qWrite10_20",
+      "1",
+      "R"
+    ],
+    "qWrite10_20,_": [
+      "qWrite10_21",
+      "1",
+      "R"
+    ],
+    "qWrite10_21,_": [
+      "qWrite10_22",
+      "1",
+      "R"
+    ],
+    "qWrite10_22,_": [
+      "qWrite10_23",
+      "1",
+      "R"
+    ],
+    "qWrite10_23,_": [
+      "qWrite10_24",
+      "1",
+      "R"
+    ],
+    "qWrite10_24,_": [
+      "qWrite10_25",
+      "1",
+      "R"
+    ],
+    "qWrite10_25,_": [
+      "qWrite10_26",
+      "1",
+      "R"
+    ],
+    "qWrite10_26,_": [
+      "qWrite10_27",
+      "1",
+      "R"
+    ],
+    "qWrite10_27,_": [
+      "qWrite10_28",
+      "1",
+      "R"
+    ],
+    "qWrite10_28,_": [
+      "qWrite10_29",
+      "1",
+      "R"
+    ],
+    "qWrite10_29,_": [
+      "qWrite10_30",
+      "1",
+      "R"
+    ],
+    "qWrite10_30,_": [
+      "qWrite10_31",
+      "1",
+      "R"
+    ],
+    "qWrite10_31,_": [
+      "qWrite10_32",
+      "1",
+      "R"
+    ],
+    "qWrite10_32,_": [
+      "qWrite10_33",
+      "1",
+      "R"
+    ],
+    "qWrite10_33,_": [
+      "qWrite10_34",
+      "1",
+      "R"
+    ],
+    "qWrite10_34,_": [
+      "qWrite10_35",
+      "1",
+      "R"
+    ],
+    "qWrite10_35,_": [
+      "qWrite10_36",
+      "1",
+      "R"
+    ],
+    "qWrite10_36,_": [
+      "qWrite10_37",
+      "1",
+      "R"
+    ],
+    "qWrite10_37,_": [
+      "qWrite10_38",
+      "1",
+      "R"
+    ],
+    "qWrite10_38,_": [
+      "qWrite10_39",
+      "1",
+      "R"
+    ],
+    "qWrite10_39,_": [
+      "qWrite10_40",
+      "1",
+      "R"
+    ],
+    "qWrite10_40,_": [
+      "qWrite10_41",
+      "1",
+      "R"
+    ],
+    "qWrite10_41,_": [
+      "qWrite10_42",
+      "1",
+      "R"
+    ],
+    "qWrite10_42,_": [
+      "qWrite10_43",
+      "1",
+      "R"
+    ],
+    "qWrite10_43,_": [
+      "qWrite10_44",
+      "1",
+      "R"
+    ],
+    "qWrite10_44,_": [
+      "qWrite10_45",
+      "1",
+      "R"
+    ],
+    "qWrite10_45,_": [
+      "qWrite10_46",
+      "1",
+      "R"
+    ],
+    "qWrite10_46,_": [
+      "qWrite10_47",
+      "1",
+      "R"
+    ],
+    "qWrite10_47,_": [
+      "qWrite10_48",
+      "1",
+      "R"
+    ],
+    "qWrite10_48,_": [
+      "qWrite10_49",
+      "1",
+      "R"
+    ],
+    "qWrite10_49,_": [
+      "qWrite10_50",
+      "1",
+      "R"
+    ],
+    "qWrite10_50,_": [
+      "qWrite10_51",
+      "1",
+      "R"
+    ],
+    "qWrite10_51,_": [
+      "qWrite10_52",
+      "1",
+      "R"
+    ],
+    "qWrite10_52,_": [
+      "qWrite10_53",
+      "1",
+      "R"
+    ],
+    "qWrite10_53,_": [
+      "qWrite10_54",
+      "1",
+      "R"
+    ],
+    "qWrite10_54,_": [
+      "qWrite10_55",
+      "1",
+      "R"
+    ],
+    "qWrite10_55,_": [
+      "qAccept",
+      "_",
+      "S"
+    ]
+  }
+}

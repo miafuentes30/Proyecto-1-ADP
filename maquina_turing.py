@@ -9,29 +9,41 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-def banner(title, width=70):
-    #titulo
-    bar = "=" * width
-    pad = (width - len(title) - 2) // 2
-    extra = width - pad - len(title) - 1
-    print(f"\n+{bar}+")
-    print(f"|{' ' * pad} {title}{' ' * extra}|")
-    print(f"+{bar}+")
+# Colores ANSI
+R    = "\033[91m"
+G    = "\033[92m"
+Y    = "\033[93m"
+B    = "\033[94m"
+M    = "\033[95m"
+C    = "\033[96m"
+W    = "\033[97m"
+DIM  = "\033[2m"
+BOLD = "\033[1m"
+RST  = "\033[0m"
 
-def section(title):
-    # subtitulo
-    dashes = "-" * max(0, 62 - len(title))
-    print(f"\n[ {title} {dashes}]")
+def clr(text, color):  return f"{color}{text}{RST}"
+def bold(text):        return f"{BOLD}{text}{RST}"
+def dim(text):         return f"{DIM}{text}{RST}"
 
-def endsection():
-    print(f"{'-' * 67}")
+def banner(title, color=C, width=68):
+    line = "─" * width
+    print(f"\n{color}{line}{RST}")
+    print(f"{color}  {bold(title)}{RST}")
+    print(f"{color}{line}{RST}")
+
+def section(title, color=Y):
+    print(f"\n{color}  {bold(title)}{RST}")
+    print(f"{color}  {'=' * (len(title) + 3)}{RST}")
+
+def endsection(color=Y):
+    print(f"{color}  {'─' * 58}{RST}")
 
 def info(label, value, indent=2):
     sp = " " * indent
-    print(f"{sp}> {label}: {value}")
+    print(f"{sp}{clr('>', C)} {clr(label, W)}: {clr(str(value), Y)}")
 
 def row_sep(width=70):
-    print("-" * width)
+    print(dim("-" * width))
     
 
 # DEFINICION DE LA MAQUINA DE TURING  - Mia 
@@ -113,9 +125,9 @@ class Tape:
         for i in range(lo, hi + 1):
             s = self.read(i)
             if i == head:
-                parts.append(f"[{s}]")
+                parts.append(clr(f"[{s}]", M))
             else:
-                parts.append(f" {s} ")
+                parts.append(dim(f" {s} "))
         return "".join(parts)
 
     def trimmed(self):
@@ -188,14 +200,15 @@ def run_tm(tm, input_str, max_steps=2_000_000, verbose=False, window=18):
                     row_sep()
                     header_shown = True
 
+                sc = G if steps < 20 else DIM
                 print(
-                    f"  {str(steps).rjust(6)}  "
-                    f"{state:<22}  "
-                    f"{str(head).rjust(4)}  "
-                    f"{repr(read_sym).rjust(5)}  "
-                    f"{repr(write_sym).rjust(8)}  "
-                    f"{move.rjust(6)}  "
-                    f"{new_state}"
+                    f"  {clr(str(steps).rjust(6), sc)}  "
+                    f"{clr(state, C):<22}  "
+                    f"{clr(str(head).rjust(4), Y)}  "
+                    f"{clr(repr(read_sym).rjust(5), M)}  "
+                    f"{clr(repr(write_sym).rjust(8), M)}  "
+                    f"{clr(move.rjust(6), B)}  "
+                    f"{clr(new_state, C)}"
                 )
                 if steps < 8 or steps % 5000 == 0:
                     print(f"         Cinta: {tape.snapshot(head, window)}")
@@ -287,6 +300,7 @@ def generate_fib_tm_json(max_n, out_path="fib_tm.json"):
         json.dump(tm_data, f, indent=2, ensure_ascii=False)
     return out_path
 
+
 # ANALISIS EMPIRICO - Angel
 # --------------------------------------------------------------------------
 
@@ -300,6 +314,7 @@ def r2_score(y_true, y_pred):
     ss_r = float(np.sum((y_true - y_pred) ** 2))
     ss_t = float(np.sum((y_true - np.mean(y_true)) ** 2))
     return 1.0 if ss_t == 0 else 1 - ss_r / ss_t
+
 
 def best_poly(x, y, degrees=(1, 2, 3)):
     """
@@ -342,6 +357,7 @@ def fmt_poly(coeffs, var="n", name="f"):
             terms.append(f"{a_s}*{var}^{pw}")
     expr = " + ".join(terms).replace("+ -", "- ")
     return f"{name}({var}) = {expr}"
+
 
 BIG_O = {0: "O(1)", 1: "O(n)", 2: "O(n^2)", 3: "O(n^3)"}
 
@@ -409,7 +425,8 @@ def plot_analysis(x, steps_arr, time_arr, fit_s, fit_t, out="analisis_tm.png"):
     plt.close()
     return out
 
-# PIPELINE PRINCIPAL
+
+# PIPELINE PRINCIPAL - Angel
 #--------------------------------------------------------------------------
 
 def main():
@@ -424,52 +441,48 @@ def main():
     MAX_STEPS = 2_000_000
 
     # Generar JSON y cargar MT
-    banner("SIMULADOR DE MAQUINA DE TURING")
+    banner("MAQUINA DE TURING", C)
     generate_fib_tm_json(MAX_N, TM_JSON)
     tm = load_tm_from_json(TM_JSON)
 
-    section("MAQUINA CARGADA DESDE JSON")
-    info("Archivo",           TM_JSON)
-    info("Nombre",            tm.name)
-    info("Descripcion",       tm.description)
+    section("JSON", G)
     info("Estado inicial",    tm.start_state)
     info("Estado aceptor",    ", ".join(sorted(tm.accept_states)))
     info("Estado rechazor",   ", ".join(sorted(tm.reject_states)))
     info("Alfabeto entrada",  "{" + ", ".join(sorted(tm.input_alphabet)) + "}")
     info("Alfabeto cinta",    "{" + ", ".join(sorted(tm.tape_alphabet)) + "}")
     info("Transiciones",      len(tm.transitions))
-    info("Rango soportado",   f"n = 0 .. {MAX_N}")
-    endsection()
+    info("Rango soportado",   f"n = 0 a {MAX_N}")
+    endsection(G)
 
     # Simulacion demostrativa
-    banner(f"SIMULACION DEMOSTRATIVA  (n = {DEMO_N})")
-    print(f"  Convension entrada:  n={DEMO_N}  ->  cinta = {repr(unary(DEMO_N))}")
-    print(f"  Resultado esperado:  F({DEMO_N}) = {fib(DEMO_N)}"
-          f"  (en unario: {unary(fib(DEMO_N)) or '(vacia)'})")  
-    print()
+    banner(f"TABLA DE CONFIGURACIONES  (n = {DEMO_N})", M)
+    print(f"  {clr('Convension entrada:', W)}  n={DEMO_N}  ->  cinta = {clr(repr(unary(DEMO_N)), Y)}")
+    print(f"  {clr('Resultado esperado:', W)}  F({DEMO_N}) = {clr(fib(DEMO_N), G)}"
+          f"  (en unario: {clr(unary(fib(DEMO_N)) or '(vacia)', Y)})\n")
 
     demo = run_tm(tm, unary(DEMO_N), max_steps=MAX_STEPS, verbose=True)
 
-    endsection()
-    section("RESULTADO DE LA SIMULACION")
+    endsection(B)
+    section("RESULTADOS", G)
     ok = demo.accepted and len(demo.output_tape) == fib(DEMO_N)
-    veredicto = "OK" if ok else "ERROR"
-    info("Estado final",       demo.final_state)
-    info("Estado de acpetación",          "ACEPTADA" if demo.accepted else "RECHAZADA")
+    col = G if ok else R
+    info("Estado final",       clr(demo.final_state, col))
+    info("Estado de acpetación",          clr("ACEPTADA" if demo.accepted else "RECHAZADA", col))
     info("Pasos ejecutados",   demo.steps)
     info("Tiempo de CPU",      f"{demo.time_sec:.6f} s")
     cinta_str = demo.output_tape if demo.output_tape else "(vacia -- F=0)"
-    info("Cinta de salida",    cinta_str)
+    info("Cinta de salida",    clr(cinta_str, Y))
     info("F(n) leido en cinta",
-         f"{len(demo.output_tape)}  ->  F({DEMO_N}) = {len(demo.output_tape)}")
-    endsection()
+         f"{len(demo.output_tape)}  ->  F({DEMO_N}) = {clr(len(demo.output_tape), G)}")
+    endsection(G)
 
     # Analisis empirico
     banner("ANALISIS EMPIRICO")
     section("ENTRADAS DE PRUEBA Y RESULTADOS")
     print(
         f"  {'n':>4}  {'F(n) esperado':>14}  {'F(n) en cinta':>14}  "
-        f"{'Pasos':>7}  {'Tiempo (s)':>11}  Veredicto"
+        f"{'Pasos':>7}  {'Tiempo (s)':>11}  Estado de aceptación"
     )
     row_sep()
 
@@ -479,18 +492,18 @@ def main():
         fib_n = fib(n)
         out_n = len(res.output_tape)
         correcto = res.accepted and out_n == fib_n
-        icono = "OK" if correcto else "ERROR"
+        icono = clr("OK", G) if correcto else clr("ERROR", R)
         rows.append({
             "n": n, "fib_n": fib_n, "out_len": out_n,
             "steps": res.steps, "time_sec": res.time_sec,
             "accepted": res.accepted, "reason": res.reason,
         })
         print(
-            f"  {str(n).rjust(4)}  "
-            f"{str(fib_n).rjust(14)}  "
-            f"{str(out_n).rjust(14)}  "
-            f"{str(res.steps).rjust(7)}  "
-            f"{f'{res.time_sec:.6f}'.rjust(11)}  "
+            f"  {clr(str(n).rjust(4), W)}  "
+            f"{clr(str(fib_n).rjust(14), DIM)}  "
+            f"{clr(str(out_n).rjust(14), Y)}  "
+            f"{clr(str(res.steps).rjust(7), C)}  "
+            f"{clr(f'{res.time_sec:.6f}'.rjust(11), DIM)}  "
             f"{icono}"
         )
     endsection()
@@ -505,19 +518,19 @@ def main():
     fit_t = best_poly(x, y_time, (1, 2, 3))
 
     section("MODELOS DE REGRESION POLINOMIAL")
-    print(f"\n  Pasos de ejecucion:")
+    print(f"\n  {bold('Pasos de ejecucion:')}")
     if fit_s:
         info("Grado del polinomio",    fit_s["deg"])
         info("R^2 (bondad de ajuste)", f"{fit_s['r2']:.6f}")
-        info("Ecuacion",               fmt_poly(fit_s["coeffs"], "n", "pasos"))
-        info("Notacion asintotica",    BIG_O.get(fit_s["deg"], f"O(n^{fit_s['deg']})")),
+        info("Ecuacion",               clr(fmt_poly(fit_s["coeffs"], "n", "pasos"), C))
+        info("Notacion asintotica",    clr(BIG_O.get(fit_s["deg"], f"O(n^{fit_s['deg']})"), G)),
 
-    print(f"\n  Tiempo de CPU:")
+    print(f"\n  {bold('Tiempo de CPU:')}")
     if fit_t:
         info("Grado del polinomio",    fit_t["deg"])
         info("R^2 (bondad de ajuste)", f"{fit_t['r2']:.6f}")
-        info("Ecuacion",               fmt_poly(fit_t["coeffs"], "n", "tiempo"))
-        info("Notacion asintotica",    BIG_O.get(fit_t["deg"], f"O(n^{fit_t['deg']})")),
+        info("Ecuacion",               clr(fmt_poly(fit_t["coeffs"], "n", "tiempo"), C))
+        info("Notacion asintotica",    clr(BIG_O.get(fit_t["deg"], f"O(n^{fit_t['deg']})"), G)),
     endsection()
 
     # Graficas
@@ -531,22 +544,22 @@ def main():
     n_acc = sum(1 for r in rows if r["accepted"])
     n_rej = len(rows) - n_acc
     info("Total pruebas",     len(rows))
-    info("Aceptadas",         n_acc)
-    info("Rechazadas",        n_rej if n_rej else "0")
+    info("Aceptadas",         clr(str(n_acc), G))
+    info("Rechazadas",        clr(str(n_rej), R) if n_rej else clr("0", G))
     if fit_s:
-        info("Complejidad pasos",  BIG_O.get(fit_s["deg"], f"O(n^{fit_s['deg']})" ))
+        info("Complejidad pasos",  clr(BIG_O.get(fit_s["deg"], f"O(n^{fit_s['deg']})"), C))
     if fit_t:
-        info("Complejidad tiempo", BIG_O.get(fit_t["deg"], f"O(n^{fit_t['deg']})" ))
+        info("Complejidad tiempo", clr(BIG_O.get(fit_t["deg"], f"O(n^{fit_t['deg']})"), C))
     print()
 
-    # 4. Modo interactivo
+    # Modo interactivo
     banner("INTERFAZ DE USUARIO")
     print(f"  Ingresa n para calcular F(n) con la MT  (rango: 0..{MAX_N}).")
-    print(f"  Escribe 'salir' o presiona Ctrl+C para terminar.\n")
+    print(f"  Escribe {clr('salir', R)} o presiona Ctrl+C para terminar.\n")
 
     while True:
         try:
-            sys.stdout.write(f"  n = ")
+            sys.stdout.write(f"  {C}n{RST} = ")
             sys.stdout.flush()
             raw = sys.stdin.readline()
             if raw == "":          # EOF
@@ -558,29 +571,30 @@ def main():
         if raw.lower() in ("salir", "exit", "q", "quit"):
             break
         if not raw.isdigit():
-            print(f"  Ingresa un entero no negativo (0, 1, 2, ...).\n")
+            print(clr("  Ingresa un entero no negativo (0, 1, 2, ...).\n", R))
             continue
 
         n_in = int(raw)
-        sys.stdout.write(f"\n  Ejecutando MT:  n={n_in}  "
-                         f"entrada unaria={repr(unary(n_in))}\n")
+        sys.stdout.write(f"\n  Ejecutando MT:  n={clr(n_in, Y)}  "
+                         f"entrada unaria={clr(repr(unary(n_in)), DIM)}\n")
         sys.stdout.flush()
         res = run_tm(tm, unary(n_in), max_steps=MAX_STEPS, verbose=False)
 
-        veredicto = "ACEPTADA" if res.accepted else "RECHAZADA"
-        print(f"  Estado final:   {res.final_state}")
-        print(f"  Veredicto:      {veredicto}")
-        print(f"  Pasos:          {res.steps}")
-        print(f"  Tiempo:         {res.time_sec:.6f} s")
+        col = G if res.accepted else R
+        print(f"  {clr('Estado final:', W)}  {clr(res.final_state, col)}")
+        print(f"  {clr('Estado de aceptación:', W)}    {clr('ACEPTADA' if res.accepted else 'RECHAZADA', col)}")
+        print(f"  {clr('Pasos:', W)}        {res.steps}")
+        print(f"  {clr('Tiempo:', W)}       {res.time_sec:.6f} s")
         if res.accepted:
             fn = len(res.output_tape)
             cinta = res.output_tape if res.output_tape else "(vacia -- F=0)"
-            print(f"  F(n):           {fn}")
-            print(f"  Cinta salida:   {cinta}\n")
+            print(f"  {clr('F(n):', W)}         {clr(fn, G)}")
+            print(f"  {clr('Cinta salida:', W)}  {clr(cinta, Y)}\n")
         else:
-            print(f"  n={n_in} esta fuera del rango soportado (0..{MAX_N}).\n")
+            print(clr(f"  n={n_in} esta fuera del rango soportado (0..{MAX_N}).\n", R))
 
-    print(f"\n  bye bye!\n")
+    print(f"\n  {clr('bye bye!', G)}\n")
+
 
 if __name__ == "__main__":
     main()
