@@ -242,3 +242,41 @@ Fue generado automáticamente desde `fib_tm_real.json`, sin eliminar ni modifica
 ### 8) Estados terminales
 - `qAccept`: la máquina terminó correctamente y la cinta contiene `F(n)` en unario.
 - `qReject`: estado de rechazo para entradas/configuraciones no válidas.
+
+## Ejemplo corto por etapas (n = 4)
+
+Entrada: `1111` (en unario, esto representa `n=4`).  
+Resultado esperado: `F(4)=3`, salida `111`.
+
+### Etapa A: Inicio e Inicialización
+- La máquina transforma la entrada en una cinta de trabajo con contador y separadores.
+- Idea visual: `nnnn|b#` (contador `n`, bloque `b` inicial y separador final).
+
+### Etapa B: Control de Bucle
+- Revisa si queda algún `n` por consumir.
+- Si encuentra uno, lo cambia por `x` y dispara una iteración completa.
+- Tras varias vueltas, se ve algo como `xxxx|...` y ya no quedan `n`.
+
+### Etapa C: Limpieza de C y retorno
+- Antes de sumar, borra el bloque temporal `c` de la iteración anterior.
+- Regresa al inicio de los bloques para copiar de forma limpia.
+
+### Etapa D: Copia de A hacia C
+- Copia el contenido de `a` dentro de `c`.
+- Usa marcas temporales (`A`) para no perder posición y luego restaura.
+
+### Etapa E: Copia de B hacia C
+- Copia también `b` dentro de `c`.
+- Al terminar esta etapa, `c` representa la suma `a+b`.
+
+### Etapa F: Actualización de bloques
+- Aplica la recurrencia: `a <- b` y `b <- c`.
+- Queda listo el siguiente par para la próxima iteración.
+
+### Etapa G: Finalización
+- Cuando ya no quedan `n`, limpia símbolos auxiliares (`x`, separadores y marcas).
+- Convierte el bloque final en salida unaria pura.
+
+### Etapa H: Estado terminal
+- Entra a `qAccept` con cinta final `111`.
+- Interpretación: longitud de la salida = `3` = `F(4)`.
