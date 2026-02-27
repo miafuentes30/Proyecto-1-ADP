@@ -441,5 +441,146 @@ def main():
     info("Rango soportado",   f"n = 0 .. {MAX_N}")
     endsection()
 
+    # Simulacion demostrativa
+    banner(f"SIMULACION DEMOSTRATIVA  (n = {DEMO_N})")
+    print(f"  Convension entrada:  n={DEMO_N}  ->  cinta = {repr(unary(DEMO_N))}")
+    print(f"  Resultado esperado:  F({DEMO_N}) = {fib(DEMO_N)}"
+          f"  (en unario: {unary(fib(DEMO_N)) or '(vacia)'})")  
+    print()
+
+    demo = run_tm(tm, unary(DEMO_N), max_steps=MAX_STEPS, verbose=True)
+
+    endsection()
+    section("RESULTADO DE LA SIMULACION")
+    ok = demo.accepted and len(demo.output_tape) == fib(DEMO_N)
+    veredicto = "OK" if ok else "ERROR"
+    info("Estado final",       demo.final_state)
+    info("Estado de acpetación",          "ACEPTADA" if demo.accepted else "RECHAZADA")
+    info("Pasos ejecutados",   demo.steps)
+    info("Tiempo de CPU",      f"{demo.time_sec:.6f} s")
+    cinta_str = demo.output_tape if demo.output_tape else "(vacia -- F=0)"
+    info("Cinta de salida",    cinta_str)
+    info("F(n) leido en cinta",
+         f"{len(demo.output_tape)}  ->  F({DEMO_N}) = {len(demo.output_tape)}")
+    endsection()
+
+    # Analisis empirico
+    banner("ANALISIS EMPIRICO")
+    section("ENTRADAS DE PRUEBA Y RESULTADOS")
+    print(
+        f"  {'n':>4}  {'F(n) esperado':>14}  {'F(n) en cinta':>14}  "
+        f"{'Pasos':>7}  {'Tiempo (s)':>11}  Veredicto"
+    )
+    row_sep()
+
+    rows = []
+    for n in N_VALUES:
+        res = run_tm(tm, unary(n), max_steps=MAX_STEPS, verbose=False)
+        fib_n = fib(n)
+        out_n = len(res.output_tape)
+        correcto = res.accepted and out_n == fib_n
+        icono = "OK" if correcto else "ERROR"
+        rows.append({
+            "n": n, "fib_n": fib_n, "out_len": out_n,
+            "steps": res.steps, "time_sec": res.time_sec,
+            "accepted": res.accepted, "reason": res.reason,
+        })
+        print(
+            f"  {str(n).rjust(4)}  "
+            f"{str(fib_n).rjust(14)}  "
+            f"{str(out_n).rjust(14)}  "
+            f"{str(res.steps).rjust(7)}  "
+            f"{f'{res.time_sec:.6f}'.rjust(11)}  "
+            f"{icono}"
+        )
+    endsection()
+
+    # Regresiones
+    acc_rows = [r for r in rows if r["accepted"]]
+    x        = np.array([r["n"]        for r in acc_rows], dtype=float)
+    y_step   = np.array([r["steps"]    for r in acc_rows], dtype=float)
+    y_time   = np.array([r["time_sec"] for r in acc_rows], dtype=float)
+
+    fit_s = best_poly(x, y_step, (1, 2, 3))
+    fit_t = best_poly(x, y_time, (1, 2, 3))
+
+    section("MODELOS DE REGRESION POLINOMIAL")
+    print(f"\n  Pasos de ejecucion:")
+    if fit_s:
+        info("Grado del polinomio",    fit_s["deg"])
+        info("R^2 (bondad de ajuste)", f"{fit_s['r2']:.6f}")
+        info("Ecuacion",               fmt_poly(fit_s["coeffs"], "n", "pasos"))
+        info("Notacion asintotica",    BIG_O.get(fit_s["deg"], f"O(n^{fit_s['deg']})")),
+
+    print(f"\n  Tiempo de CPU:")
+    if fit_t:
+        info("Grado del polinomio",    fit_t["deg"])
+        info("R^2 (bondad de ajuste)", f"{fit_t['r2']:.6f}")
+        info("Ecuacion",               fmt_poly(fit_t["coeffs"], "n", "tiempo"))
+        info("Notacion asintotica",    BIG_O.get(fit_t["deg"], f"O(n^{fit_t['deg']})")),
+    endsection()
+
+    # Graficas
+    section("GRAFICAS")
+    out_img = plot_analysis(x, y_step, y_time, fit_s, fit_t)
+    info("Imagen guardada en", out_img)
+    endsection()
+
+    # Resumen
+    banner("RESUMEN")
+    n_acc = sum(1 for r in rows if r["accepted"])
+    n_rej = len(rows) - n_acc
+    info("Total pruebas",     len(rows))
+    info("Aceptadas",         n_acc)
+    info("Rechazadas",        n_rej if n_rej else "0")
+    if fit_s:
+        info("Complejidad pasos",  BIG_O.get(fit_s["deg"], f"O(n^{fit_s['deg']})" ))
+    if fit_t:
+        info("Complejidad tiempo", BIG_O.get(fit_t["deg"], f"O(n^{fit_t['deg']})" ))
+    print()
+
+    # 4. Modo interactivo
+    banner("INTERFAZ DE USUARIO")
+    print(f"  Ingresa n para calcular F(n) con la MT  (rango: 0..{MAX_N}).")
+    print(f"  Escribe 'salir' o presiona Ctrl+C para terminar.\n")
+
+    while True:
+        try:
+            sys.stdout.write(f"  n = ")
+            sys.stdout.flush()
+            raw = sys.stdin.readline()
+            if raw == "":          # EOF
+                break
+            raw = raw.strip()
+        except KeyboardInterrupt:
+            break
+
+        if raw.lower() in ("salir", "exit", "q", "quit"):
+            break
+        if not raw.isdigit():
+            print(f"  Ingresa un entero no negativo (0, 1, 2, ...).\n")
+            continue
+
+        n_in = int(raw)
+        sys.stdout.write(f"\n  Ejecutando MT:  n={n_in}  "
+                         f"entrada unaria={repr(unary(n_in))}\n")
+        sys.stdout.flush()
+        res = run_tm(tm, unary(n_in), max_steps=MAX_STEPS, verbose=False)
+
+        veredicto = "ACEPTADA" if res.accepted else "RECHAZADA"
+        print(f"  Estado final:   {res.final_state}")
+        print(f"  Veredicto:      {veredicto}")
+        print(f"  Pasos:          {res.steps}")
+        print(f"  Tiempo:         {res.time_sec:.6f} s")
+        if res.accepted:
+            fn = len(res.output_tape)
+            cinta = res.output_tape if res.output_tape else "(vacia -- F=0)"
+            print(f"  F(n):           {fn}")
+            print(f"  Cinta salida:   {cinta}\n")
+        else:
+            print(f"  n={n_in} esta fuera del rango soportado (0..{MAX_N}).\n")
+
+    print(f"\n  bye bye!\n")
+
 if __name__ == "__main__":
     main()
