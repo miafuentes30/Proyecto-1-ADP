@@ -1,6 +1,7 @@
 import json
 import sys
 import time
+import argparse
 from dataclasses import dataclass
 from typing import Dict, Tuple, List, Optional
 
@@ -434,15 +435,29 @@ def main():
     Generación de la MT, simulación demostrativa, analisis empirico
     de complejidad temporal/espacial e input usuario.
     """
-    MAX_N     = 10
-    TM_JSON   = "fib_tm.json"
-    N_VALUES  = list(range(0, MAX_N + 1))
+    parser = argparse.ArgumentParser(
+        description="Simulador de Máquina de Turing determinista de una cinta"
+    )
+    parser.add_argument(
+        "--tm",
+        default="fib_tm_real.json",
+        help="Ruta al archivo JSON con la definición de la MT",
+    )
+    parser.add_argument(
+        "--max-n",
+        type=int,
+        default=10,
+        help="Máximo n para el análisis empírico (solo para pruebas automáticas)",
+    )
+    args = parser.parse_args()
+
+    TM_JSON   = args.tm
+    N_VALUES  = list(range(0, args.max_n + 1))
     DEMO_N    = 4
     MAX_STEPS = 2_000_000
 
-    # Generar JSON y cargar MT
+    # Cargar MT desde archivo JSON
     banner("MAQUINA DE TURING", C)
-    generate_fib_tm_json(MAX_N, TM_JSON)
     tm = load_tm_from_json(TM_JSON)
 
     section("JSON", G)
@@ -452,7 +467,7 @@ def main():
     info("Alfabeto entrada",  "{" + ", ".join(sorted(tm.input_alphabet)) + "}")
     info("Alfabeto cinta",    "{" + ", ".join(sorted(tm.tape_alphabet)) + "}")
     info("Transiciones",      len(tm.transitions))
-    info("Rango soportado",   f"n = 0 a {MAX_N}")
+    info("Archivo de la MT",  TM_JSON)
     endsection(G)
 
     # Simulacion demostrativa
@@ -554,7 +569,7 @@ def main():
 
     # Modo interactivo
     banner("INTERFAZ DE USUARIO")
-    print(f"  Ingresa n para calcular F(n) con la MT  (rango: 0..{MAX_N}).")
+    print("  Ingresa n para calcular F(n) con la MT cargada.")
     print(f"  Escribe {clr('salir', R)} o presiona Ctrl+C para terminar.\n")
 
     while True:
@@ -591,7 +606,7 @@ def main():
             print(f"  {clr('F(n):', W)}         {clr(fn, G)}")
             print(f"  {clr('Cinta salida:', W)}  {clr(cinta, Y)}\n")
         else:
-            print(clr(f"  n={n_in} esta fuera del rango soportado (0..{MAX_N}).\n", R))
+            print(clr(f"  Entrada no aceptada por la MT cargada. Razón: {res.reason}\n", R))
 
     print(f"\n  {clr('bye bye!', G)}\n")
 

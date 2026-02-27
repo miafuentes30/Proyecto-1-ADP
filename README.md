@@ -31,12 +31,20 @@ Ejecuta el programa principal:
 python maquina_turing.py
 ```
 
+También puedes indicar explícitamente el JSON de la MT y el rango del análisis empírico:
+
+```bash
+python maquina_turing.py --tm fib_tm_real.json --max-n 10
+```
+
 El programa realizará:
-1. Generación automática del archivo `fib_tm.json` con la definición de la MT
+1. Carga de la MT desde el archivo JSON indicado (por defecto `fib_tm_real.json`)
 2. Simulación para n=4
-3. Análisis empírico con valores de n desde 0 hasta 10 (por rendimiendo del CPU); se puede modificar la entrada en la línea 437 (MAX_N = 10)
+3. Análisis empírico con valores de n desde 0 hasta el valor de `--max-n`
 4. Generación de gráficas 
 5. Interfaz para probar valores personalizados
+
+> Nota: `fib_tm.json` se mantiene como versión tabulada/acotada (precomputada). Para una MT que calcula por recurrencia en cinta, usa `fib_tm_real.json`.
 
 
 ## Funcionamiento de la MT
@@ -45,3 +53,22 @@ El programa realizará:
 2. **Borrado**: Limpia la cinta de entrada
 3. **Escritura**: Escribe F(n) símbolos '1' como resultado
 4. **Aceptación**: Transiciona al estado qAccept
+
+## Documentación para entrega
+
+### MT real (recurrencia en cinta)
+
+- Convenciones: [convenciones_mt_real.md](convenciones_mt_real.md)
+- Diagrama simplificado: [diagrama_mt_real_simplificado.md](diagrama_mt_real_simplificado.md)
+- Componentes MT: [fib_tm_real.json](fib_tm_real.json)
+
+### Versiones anteriores (conservadas)
+
+- Componentes tabulados: [fib_tm.json](fib_tm.json)
+- Diagrama detallado tabulado: [diagrama_transiciones.md](diagrama_transiciones.md)
+- Diagrama simplificado tabulado: [diagrama_transiciones_simplificado.md](diagrama_transiciones_simplificado.md)
+- Diagrama básico explicativo: [diagrama_fases_basico.md](diagrama_fases_basico.md)
+
+### Verificación de cumplimiento
+
+- Checklist contra instrucciones: [checklist_cumplimiento.md](checklist_cumplimiento.md)

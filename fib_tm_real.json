@@ -1,0 +1,722 @@
+{
+  "name": "Fibonacci MT por recurrencia real (1 cinta)",
+  "description": "MT determinista de 1 cinta que calcula Fibonacci en unario por recurrencia iterativa sin hardcodear F(n).",
+  "blank": "_",
+  "input_alphabet": [
+    "1"
+  ],
+  "tape_alphabet": [
+    "1",
+    "_",
+    "|",
+    "#",
+    "n",
+    "x",
+    "a",
+    "A",
+    "b",
+    "B",
+    "c"
+  ],
+  "start_state": "qStart",
+  "accept_states": [
+    "qAccept"
+  ],
+  "reject_states": [
+    "qReject"
+  ],
+  "states": [
+    "qA_GoHash",
+    "qA_ReturnBar",
+    "qA_WriteHash",
+    "qAccept",
+    "qB_GoHash",
+    "qB_ReturnBar",
+    "qB_WriteHash",
+    "qBackToBarAfterEraseA",
+    "qBackToBarFromHash",
+    "qClearC",
+    "qCopyAScan",
+    "qCopyBScan",
+    "qEraseA",
+    "qFinalizeData",
+    "qFinalizeEraseLeft",
+    "qFinalizeGoBar",
+    "qGoBarForIter",
+    "qInitEmptyWriteB",
+    "qInitEmptyWriteHash",
+    "qInitScanN",
+    "qInitWriteB",
+    "qInitWriteHash",
+    "qLeftOverNX",
+    "qLoopSeekN",
+    "qReject",
+    "qRelabelPass",
+    "qRestoreA",
+    "qRestoreB",
+    "qReturnToNStart",
+    "qStart"
+  ],
+  "transitions": {
+    "qStart,1": [
+      "qInitScanN",
+      "n",
+      "R"
+    ],
+    "qStart,_": [
+      "qInitEmptyWriteB",
+      "|",
+      "R"
+    ],
+    "qInitScanN,1": [
+      "qInitScanN",
+      "n",
+      "R"
+    ],
+    "qInitScanN,_": [
+      "qInitWriteB",
+      "|",
+      "R"
+    ],
+    "qInitWriteB,_": [
+      "qInitWriteHash",
+      "b",
+      "R"
+    ],
+    "qInitWriteHash,_": [
+      "qReturnToNStart",
+      "#",
+      "L"
+    ],
+    "qInitEmptyWriteB,_": [
+      "qInitEmptyWriteHash",
+      "b",
+      "R"
+    ],
+    "qInitEmptyWriteHash,_": [
+      "qReturnToNStart",
+      "#",
+      "L"
+    ],
+    "qReturnToNStart,a": [
+      "qReturnToNStart",
+      "a",
+      "L"
+    ],
+    "qReturnToNStart,A": [
+      "qReturnToNStart",
+      "A",
+      "L"
+    ],
+    "qReturnToNStart,b": [
+      "qReturnToNStart",
+      "b",
+      "L"
+    ],
+    "qReturnToNStart,B": [
+      "qReturnToNStart",
+      "B",
+      "L"
+    ],
+    "qReturnToNStart,c": [
+      "qReturnToNStart",
+      "c",
+      "L"
+    ],
+    "qReturnToNStart,_": [
+      "qReturnToNStart",
+      "_",
+      "L"
+    ],
+    "qReturnToNStart,#": [
+      "qReturnToNStart",
+      "#",
+      "L"
+    ],
+    "qReturnToNStart,|": [
+      "qLeftOverNX",
+      "|",
+      "L"
+    ],
+    "qLeftOverNX,n": [
+      "qLeftOverNX",
+      "n",
+      "L"
+    ],
+    "qLeftOverNX,x": [
+      "qLeftOverNX",
+      "x",
+      "L"
+    ],
+    "qLeftOverNX,_": [
+      "qLoopSeekN",
+      "_",
+      "R"
+    ],
+    "qLoopSeekN,n": [
+      "qGoBarForIter",
+      "x",
+      "R"
+    ],
+    "qLoopSeekN,x": [
+      "qLoopSeekN",
+      "x",
+      "R"
+    ],
+    "qLoopSeekN,|": [
+      "qFinalizeEraseLeft",
+      "|",
+      "L"
+    ],
+    "qGoBarForIter,n": [
+      "qGoBarForIter",
+      "n",
+      "R"
+    ],
+    "qGoBarForIter,x": [
+      "qGoBarForIter",
+      "x",
+      "R"
+    ],
+    "qGoBarForIter,|": [
+      "qClearC",
+      "|",
+      "R"
+    ],
+    "qClearC,c": [
+      "qClearC",
+      "_",
+      "R"
+    ],
+    "qClearC,a": [
+      "qClearC",
+      "a",
+      "R"
+    ],
+    "qClearC,A": [
+      "qClearC",
+      "A",
+      "R"
+    ],
+    "qClearC,b": [
+      "qClearC",
+      "b",
+      "R"
+    ],
+    "qClearC,B": [
+      "qClearC",
+      "B",
+      "R"
+    ],
+    "qClearC,_": [
+      "qClearC",
+      "_",
+      "R"
+    ],
+    "qClearC,#": [
+      "qBackToBarFromHash",
+      "#",
+      "L"
+    ],
+    "qBackToBarFromHash,a": [
+      "qBackToBarFromHash",
+      "a",
+      "L"
+    ],
+    "qBackToBarFromHash,A": [
+      "qBackToBarFromHash",
+      "A",
+      "L"
+    ],
+    "qBackToBarFromHash,b": [
+      "qBackToBarFromHash",
+      "b",
+      "L"
+    ],
+    "qBackToBarFromHash,B": [
+      "qBackToBarFromHash",
+      "B",
+      "L"
+    ],
+    "qBackToBarFromHash,c": [
+      "qBackToBarFromHash",
+      "c",
+      "L"
+    ],
+    "qBackToBarFromHash,_": [
+      "qBackToBarFromHash",
+      "_",
+      "L"
+    ],
+    "qBackToBarFromHash,|": [
+      "qCopyAScan",
+      "|",
+      "R"
+    ],
+    "qCopyAScan,A": [
+      "qCopyAScan",
+      "A",
+      "R"
+    ],
+    "qCopyAScan,b": [
+      "qCopyAScan",
+      "b",
+      "R"
+    ],
+    "qCopyAScan,B": [
+      "qCopyAScan",
+      "B",
+      "R"
+    ],
+    "qCopyAScan,c": [
+      "qCopyAScan",
+      "c",
+      "R"
+    ],
+    "qCopyAScan,_": [
+      "qCopyAScan",
+      "_",
+      "R"
+    ],
+    "qCopyAScan,a": [
+      "qA_GoHash",
+      "A",
+      "R"
+    ],
+    "qCopyAScan,#": [
+      "qRestoreA",
+      "#",
+      "L"
+    ],
+    "qA_GoHash,A": [
+      "qA_GoHash",
+      "A",
+      "R"
+    ],
+    "qA_GoHash,a": [
+      "qA_GoHash",
+      "a",
+      "R"
+    ],
+    "qA_GoHash,b": [
+      "qA_GoHash",
+      "b",
+      "R"
+    ],
+    "qA_GoHash,B": [
+      "qA_GoHash",
+      "B",
+      "R"
+    ],
+    "qA_GoHash,c": [
+      "qA_GoHash",
+      "c",
+      "R"
+    ],
+    "qA_GoHash,_": [
+      "qA_GoHash",
+      "_",
+      "R"
+    ],
+    "qA_GoHash,#": [
+      "qA_WriteHash",
+      "c",
+      "R"
+    ],
+    "qA_WriteHash,_": [
+      "qA_ReturnBar",
+      "#",
+      "L"
+    ],
+    "qA_ReturnBar,a": [
+      "qA_ReturnBar",
+      "a",
+      "L"
+    ],
+    "qA_ReturnBar,A": [
+      "qA_ReturnBar",
+      "A",
+      "L"
+    ],
+    "qA_ReturnBar,b": [
+      "qA_ReturnBar",
+      "b",
+      "L"
+    ],
+    "qA_ReturnBar,B": [
+      "qA_ReturnBar",
+      "B",
+      "L"
+    ],
+    "qA_ReturnBar,c": [
+      "qA_ReturnBar",
+      "c",
+      "L"
+    ],
+    "qA_ReturnBar,_": [
+      "qA_ReturnBar",
+      "_",
+      "L"
+    ],
+    "qA_ReturnBar,#": [
+      "qA_ReturnBar",
+      "#",
+      "L"
+    ],
+    "qA_ReturnBar,|": [
+      "qCopyAScan",
+      "|",
+      "R"
+    ],
+    "qRestoreA,A": [
+      "qRestoreA",
+      "a",
+      "L"
+    ],
+    "qRestoreA,a": [
+      "qRestoreA",
+      "a",
+      "L"
+    ],
+    "qRestoreA,b": [
+      "qRestoreA",
+      "b",
+      "L"
+    ],
+    "qRestoreA,B": [
+      "qRestoreA",
+      "B",
+      "L"
+    ],
+    "qRestoreA,c": [
+      "qRestoreA",
+      "c",
+      "L"
+    ],
+    "qRestoreA,_": [
+      "qRestoreA",
+      "_",
+      "L"
+    ],
+    "qRestoreA,|": [
+      "qCopyBScan",
+      "|",
+      "R"
+    ],
+    "qCopyBScan,B": [
+      "qCopyBScan",
+      "B",
+      "R"
+    ],
+    "qCopyBScan,a": [
+      "qCopyBScan",
+      "a",
+      "R"
+    ],
+    "qCopyBScan,A": [
+      "qCopyBScan",
+      "A",
+      "R"
+    ],
+    "qCopyBScan,c": [
+      "qCopyBScan",
+      "c",
+      "R"
+    ],
+    "qCopyBScan,_": [
+      "qCopyBScan",
+      "_",
+      "R"
+    ],
+    "qCopyBScan,b": [
+      "qB_GoHash",
+      "B",
+      "R"
+    ],
+    "qCopyBScan,#": [
+      "qRestoreB",
+      "#",
+      "L"
+    ],
+    "qB_GoHash,A": [
+      "qB_GoHash",
+      "A",
+      "R"
+    ],
+    "qB_GoHash,a": [
+      "qB_GoHash",
+      "a",
+      "R"
+    ],
+    "qB_GoHash,b": [
+      "qB_GoHash",
+      "b",
+      "R"
+    ],
+    "qB_GoHash,B": [
+      "qB_GoHash",
+      "B",
+      "R"
+    ],
+    "qB_GoHash,c": [
+      "qB_GoHash",
+      "c",
+      "R"
+    ],
+    "qB_GoHash,_": [
+      "qB_GoHash",
+      "_",
+      "R"
+    ],
+    "qB_GoHash,#": [
+      "qB_WriteHash",
+      "c",
+      "R"
+    ],
+    "qB_WriteHash,_": [
+      "qB_ReturnBar",
+      "#",
+      "L"
+    ],
+    "qB_ReturnBar,a": [
+      "qB_ReturnBar",
+      "a",
+      "L"
+    ],
+    "qB_ReturnBar,A": [
+      "qB_ReturnBar",
+      "A",
+      "L"
+    ],
+    "qB_ReturnBar,b": [
+      "qB_ReturnBar",
+      "b",
+      "L"
+    ],
+    "qB_ReturnBar,B": [
+      "qB_ReturnBar",
+      "B",
+      "L"
+    ],
+    "qB_ReturnBar,c": [
+      "qB_ReturnBar",
+      "c",
+      "L"
+    ],
+    "qB_ReturnBar,_": [
+      "qB_ReturnBar",
+      "_",
+      "L"
+    ],
+    "qB_ReturnBar,#": [
+      "qB_ReturnBar",
+      "#",
+      "L"
+    ],
+    "qB_ReturnBar,|": [
+      "qCopyBScan",
+      "|",
+      "R"
+    ],
+    "qRestoreB,B": [
+      "qRestoreB",
+      "b",
+      "L"
+    ],
+    "qRestoreB,a": [
+      "qRestoreB",
+      "a",
+      "L"
+    ],
+    "qRestoreB,A": [
+      "qRestoreB",
+      "A",
+      "L"
+    ],
+    "qRestoreB,b": [
+      "qRestoreB",
+      "b",
+      "L"
+    ],
+    "qRestoreB,c": [
+      "qRestoreB",
+      "c",
+      "L"
+    ],
+    "qRestoreB,_": [
+      "qRestoreB",
+      "_",
+      "L"
+    ],
+    "qRestoreB,|": [
+      "qEraseA",
+      "|",
+      "R"
+    ],
+    "qEraseA,a": [
+      "qEraseA",
+      "_",
+      "R"
+    ],
+    "qEraseA,b": [
+      "qEraseA",
+      "b",
+      "R"
+    ],
+    "qEraseA,c": [
+      "qEraseA",
+      "c",
+      "R"
+    ],
+    "qEraseA,A": [
+      "qEraseA",
+      "A",
+      "R"
+    ],
+    "qEraseA,B": [
+      "qEraseA",
+      "B",
+      "R"
+    ],
+    "qEraseA,_": [
+      "qEraseA",
+      "_",
+      "R"
+    ],
+    "qEraseA,#": [
+      "qBackToBarAfterEraseA",
+      "#",
+      "L"
+    ],
+    "qBackToBarAfterEraseA,a": [
+      "qBackToBarAfterEraseA",
+      "a",
+      "L"
+    ],
+    "qBackToBarAfterEraseA,A": [
+      "qBackToBarAfterEraseA",
+      "A",
+      "L"
+    ],
+    "qBackToBarAfterEraseA,b": [
+      "qBackToBarAfterEraseA",
+      "b",
+      "L"
+    ],
+    "qBackToBarAfterEraseA,B": [
+      "qBackToBarAfterEraseA",
+      "B",
+      "L"
+    ],
+    "qBackToBarAfterEraseA,c": [
+      "qBackToBarAfterEraseA",
+      "c",
+      "L"
+    ],
+    "qBackToBarAfterEraseA,_": [
+      "qBackToBarAfterEraseA",
+      "_",
+      "L"
+    ],
+    "qBackToBarAfterEraseA,|": [
+      "qRelabelPass",
+      "|",
+      "R"
+    ],
+    "qRelabelPass,b": [
+      "qRelabelPass",
+      "a",
+      "R"
+    ],
+    "qRelabelPass,c": [
+      "qRelabelPass",
+      "b",
+      "R"
+    ],
+    "qRelabelPass,a": [
+      "qRelabelPass",
+      "a",
+      "R"
+    ],
+    "qRelabelPass,A": [
+      "qRelabelPass",
+      "A",
+      "R"
+    ],
+    "qRelabelPass,B": [
+      "qRelabelPass",
+      "B",
+      "R"
+    ],
+    "qRelabelPass,_": [
+      "qRelabelPass",
+      "_",
+      "R"
+    ],
+    "qRelabelPass,#": [
+      "qReturnToNStart",
+      "#",
+      "L"
+    ],
+    "qFinalizeEraseLeft,x": [
+      "qFinalizeEraseLeft",
+      "_",
+      "L"
+    ],
+    "qFinalizeEraseLeft,n": [
+      "qFinalizeEraseLeft",
+      "_",
+      "L"
+    ],
+    "qFinalizeEraseLeft,_": [
+      "qFinalizeGoBar",
+      "_",
+      "R"
+    ],
+    "qFinalizeGoBar,_": [
+      "qFinalizeGoBar",
+      "_",
+      "R"
+    ],
+    "qFinalizeGoBar,|": [
+      "qFinalizeData",
+      "_",
+      "R"
+    ],
+    "qFinalizeData,a": [
+      "qFinalizeData",
+      "1",
+      "R"
+    ],
+    "qFinalizeData,b": [
+      "qFinalizeData",
+      "_",
+      "R"
+    ],
+    "qFinalizeData,c": [
+      "qFinalizeData",
+      "_",
+      "R"
+    ],
+    "qFinalizeData,A": [
+      "qFinalizeData",
+      "_",
+      "R"
+    ],
+    "qFinalizeData,B": [
+      "qFinalizeData",
+      "_",
+      "R"
+    ],
+    "qFinalizeData,_": [
+      "qFinalizeData",
+      "_",
+      "R"
+    ],
+    "qFinalizeData,#": [
+      "qAccept",
+      "_",
+      "S"
+    ]
+  }
+}
