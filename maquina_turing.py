@@ -409,5 +409,37 @@ def plot_analysis(x, steps_arr, time_arr, fit_s, fit_t, out="analisis_tm.png"):
     plt.close()
     return out
 
+# PIPELINE PRINCIPAL
+#--------------------------------------------------------------------------
+
+def main():
+    """
+    Generación de la MT, simulación demostrativa, analisis empirico
+    de complejidad temporal/espacial e input usuario.
+    """
+    MAX_N     = 10
+    TM_JSON   = "fib_tm.json"
+    N_VALUES  = list(range(0, MAX_N + 1))
+    DEMO_N    = 4
+    MAX_STEPS = 2_000_000
+
+    # Generar JSON y cargar MT
+    banner("SIMULADOR DE MAQUINA DE TURING")
+    generate_fib_tm_json(MAX_N, TM_JSON)
+    tm = load_tm_from_json(TM_JSON)
+
+    section("MAQUINA CARGADA DESDE JSON")
+    info("Archivo",           TM_JSON)
+    info("Nombre",            tm.name)
+    info("Descripcion",       tm.description)
+    info("Estado inicial",    tm.start_state)
+    info("Estado aceptor",    ", ".join(sorted(tm.accept_states)))
+    info("Estado rechazor",   ", ".join(sorted(tm.reject_states)))
+    info("Alfabeto entrada",  "{" + ", ".join(sorted(tm.input_alphabet)) + "}")
+    info("Alfabeto cinta",    "{" + ", ".join(sorted(tm.tape_alphabet)) + "}")
+    info("Transiciones",      len(tm.transitions))
+    info("Rango soportado",   f"n = 0 .. {MAX_N}")
+    endsection()
+
 if __name__ == "__main__":
     main()
